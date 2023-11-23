@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.js"></script>
+    <title>T02</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sistema Solar</h1>
+
+        <h2>Visualización 1 - Planetas</h2>
+        <div id="vis-1">
+        </div>
+
+        <h2>Visualización 2 - Satelites de los planetas</h2>
+        <div>
+            <h5>Selecionar subconjuto de planetas</h5>
+            <button id="showCat2">Demoran menos de 26 años</button>
+            <button id="showCat1">Demoran más de 26 años</button>
+        </div>
+        <div>
+            <h5>Filtrar satelites</h5>
+            <button id="filter-button">Satelites con radio > 100km</button>
+            <button id="filter-reset">Resetear filtro</button>
+        </div>
+        <div>
+            <h5>Ordenar por</h5>
+            <select id="order-by">
+                <option value="porDefecto" selected>-</option>
+                <option value="alfabético">Nombre</option>
+                <option value="albedo">Albedo</option>
+            </select>
+
+        </div>
+        <div id="vis-2">
+            <h4 id="selected"></h4>
+        </div>
+    </div>
+    <script src="main.js"></script>
+    <script src="configuration.js"></script>
+</body>
+
+</html>
