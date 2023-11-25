@@ -3,27 +3,33 @@ const SVG2 = d3.select("#vis-2").append("svg"); // Circular Packing
 
 const EV_PL = 'data\data_Procesada\proyecto_data_ev_table_premier_league_2022_2023.csv';
 const FIFA = 'data\data_Procesada\proyecto_data_fifa.csv';
-const data = 'data/data_Procesada/proyecto_data_ev_table_premier_league_2022_2023.json'
+const data = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_ev_table_premier_league_2022_2023.json'
 
-// const data = [
-//     {
-//       equipo: "Equipo A",
-//       puntuaciones: [1, 2, 4, 8, 9, 4, 8]
-//     },
-//     {
-//       equipo: "Equipo B",
-//       puntuaciones: [7, 6, 7, 8, 4, 2, 9]
-//     },
-//     {
-//       equipo: "Equipo C",
-//       puntuaciones: [1, 8, 1, 7, 1, 9,3]
-//     }
-//   ];
+const premier_league_teams = {'Arsenal': '#ef0107',
+'Aston Villa': '#490024',
+'Bournemouth': '#da291c',
+'Brentford': '#e30613',
+'Brighton & Hove Albion': '#0057b8',
+'Chelsea': '#034694',
+'Crystal Palace': '#1b458f',
+'Everton': '#003399',
+'Fulham': '#cc0000',
+'Leeds United': '#ffcd00',
+'Leicester City': '#003090',
+'Liverpool': '#c8102e',
+'Manchester City': '#6cabdd',
+'Manchester United': '#da291c',
+'Newcastle United': '#241f20',
+'Nottingham Forest': '#d00000',
+'Southampton': '#d71920',
+'Tottenham Hotspur': '#132257',
+'West Ham United': '#7a263a',
+'Wolverhampton Wanderers': '#fdb913'};
   
 
 // Tamaños
-const WIDTH_VIS_1 = 900;
-const HEIGHT_VIS_1 = 600;
+const WIDTH_VIS_1 = 1100;
+const HEIGHT_VIS_1 = 800;
 
 const WIDTH_VIS_2 = 800;
 const HEIGHT_VIS_2 = 800;
@@ -31,8 +37,8 @@ const HEIGHT_VIS_2 = 800;
 const MARGIN = {
     top: 70,
     bottom: 70,
-    left: 15,
-    right: 100,
+    left: 19.5,
+    right: 50,
   };
 
 
@@ -53,13 +59,13 @@ function loadingData() {
         console.log(d)
 
         let data_ev = d.map(item => ({
-            equipo: "Equipo B",
-            puntuaciones: [7, 6, 7, 8, 4, 2, 9]
+            equipo: item.equipo,
+            puntuaciones: item.puntuaciones,
         }
         ));
 
         
-    //     createMultilineChart(data_ev);
+        createMultilineChart(data_ev);
     })
 }
 
@@ -67,26 +73,43 @@ function loadingData() {
 
 function createMultilineChart(data) {
     
+    const n = data[0].puntuaciones.length ;// Total de partidos
+    const n_teams = data.length;
+    console.log(n_teams,'Total Equipos');
+    console.log(n-1,'Total Fechas por equipo');
     // Grafico MultilineChart de la data data en SVG1
+    const flattenedData = data.flatMap((equipo, equipoIndex) => 
+    equipo.puntuaciones.map((puntuacion, index) => ({
+        equipo,
+        puntuacion,
+        index: index + 1,
+    }))
+    );
+
+    const equipos = d3.group(flattenedData, d => d.equipo);
+
+    const extraPoints = data.map(equipo => ({
+        equipo,
+        puntuacion: equipo.puntuaciones[ n - 1],
+        index: n 
+    }));
+
 
 
     // Creamos escalas
-    const n = data[0].puntuaciones.length // Total de partidos
-    console.log(n)
 
     const minPunt = d3.min(data, d => d3.min(d.puntuaciones));
     const maxPunt = d3.max(data, d => d3.max(d.puntuaciones));
+    console.log(minPunt, maxPunt);
 
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const escalaX = d3.scaleLinear([1, n], [1, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
-    const escalaY = d3.scaleLinear([1, 9], [1, HEIGHT_VIS_1 - 2 * MARGIN.bottom]);
+    const escalaX = d3.scaleLinear([1, n], [0, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
+    const escalaY = d3.scaleLinear([1, n_teams], [0, HEIGHT_VIS_1 - 2 * MARGIN.bottom]);
 
     // Creamos ejes
     const ejeX = d3.axisBottom(escalaX).ticks(n);
-    const ejeY = d3.axisLeft(escalaY).ticks(8);
-
-
+    const ejeY = d3.axisLeft(escalaY).ticks(n_teams);
 
     // Agregamos ejes
     SVG1.append('g')
@@ -107,29 +130,9 @@ function createMultilineChart(data) {
         
 
     // Creamos lineas y puntos
-    const flattenedData = data.flatMap((equipo, equipoIndex) => 
-    equipo.puntuaciones.map((puntuacion, index) => ({
-        equipo,
-        puntuacion,
-        index: index + 1,
-    }))
-    );
-
-    container2.raise();
-
-    container2.selectAll("circle")
-        .data(flattenedData)
-        .join("circle")
-        .attr("r", 6)
-        .attr("fill",  (d) => colorScale(d.equipo))
-        .attr("cx", (d) => escalaX(d.index))
-        .attr("cy", (d) => escalaY(d.puntuacion));
-    
-    const equipos = d3.group(flattenedData, d => d.equipo);
-
-    var lines = d3.line()
-    .x(d => escalaX(d.index)) 
-    .y(d => escalaY(d.puntuacion));
+    let lines = d3.line()
+        .x(d => escalaX(d.index)) 
+        .y(d => escalaY(d.puntuacion));
 
 
     console.log(equipos)
@@ -139,25 +142,29 @@ function createMultilineChart(data) {
         .join('path')
         .attr('d', ([d, val]) => lines(val)) 
         .attr('fill', 'none')
-        .attr('stroke', ([key]) => colorScale(key))
+        .attr('stroke', ([key]) => premier_league_teams[key.equipo])
         .attr('stroke-width', 4);
-    
-    // Logo club
 
-    const extraPoints = data.map(equipo => ({
-        equipo,
-        puntuacion: equipo.puntuaciones[ n - 1], // misma puntuación que el último punto
-        index: n // posición x para el nuevo punto
-    }));
+    container2.raise();
 
+    container2.selectAll("circle")
+        .data(flattenedData)
+        .join("circle")
+        .attr("r", 6)
+        .attr("fill",  (d) => premier_league_teams[d.equipo.equipo])
+        .attr("cx", (d) => escalaX(d.index))
+        .attr("cy", (d) => escalaY(d.puntuacion));
     
+    
+    
+    // Logo clubes    
     // Dibujar el círculo extra para cada serie
     container2.selectAll("circle.extra")
         .data(extraPoints)
         .join("circle")
         .attr("class", "extra")
         .attr("r", 20)
-        .attr("fill", d => colorScale(d.equipo))
+        .attr("fill", d => premier_league_teams[d.equipo.equipo])
         .attr("cx", d => escalaX(d.index))
         .attr("transform", `translate(${(escalaX(1)- escalaX(0))/3 }, 0)`)
         .attr("cy", d => escalaY(d.puntuacion));
