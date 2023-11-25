@@ -216,7 +216,7 @@ function createMultilineChart(data, data_fifa) {
         .append("rect")
         .attr("width", WIDTH_VIS_1 - MARGIN.left - MARGIN.right+15) 
         .attr("height", HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom + 100)
-        .attr("x", -10)
+        .attr("x", 0)
         .attr("y", MARGIN.top-10);
 
     // Aplicar el clipPath a los elementos que no deben superponerse sobre los ejes
