@@ -56,7 +56,6 @@ loadingData();
 function loadingData() {
 
     d3.json(data).then(d => {
-        console.log(d)
 
         let data_ev = d.map(item => ({
             equipo: item.equipo,
@@ -64,8 +63,7 @@ function loadingData() {
         }
         ));
     
-        d3.json(FIFA).then(d => {
-            console.log(d)
+        d3.csv(FIFA).then(d => {
 
             let data_fifa = d.map(item => ({
                 // ID,Name,Age,Photo,Nationality,Flag,Overall,Potential,Club,Club Logo
@@ -78,8 +76,8 @@ function loadingData() {
                 overall: item.Overall,
                 potential: item.Potential,
                 club: item.Club,
-                club_logo: item['Club Logo'],
-                real_face: item['Real Face'],
+                club_logo: item.ClubLogo,
+                real_face: item.RealFace,
             }
             ));
 
@@ -107,6 +105,7 @@ function createMultilineChart(data, data_fifa) {
     );
 
     const equipos = d3.group(flattenedData, d => d.equipo);
+
 
     const extraPoints = data.map(equipo => ({
         equipo,
@@ -188,13 +187,16 @@ function createMultilineChart(data, data_fifa) {
     //     .attr("cx", d => escalaX(d.index))
     //     .attr("transform", `translate(${(escalaX(4.5)- escalaX(2))/2 }, 0)`)
     //     .attr("cy", d => escalaY(d.puntuacion));
+
+    
+
     container2.selectAll("image.extra")
     .data(extraPoints)
     .join("image")
     .attr("class", "extra")
     .attr("width", 40)  // Define el ancho de la imagen
     .attr("height", 40) // Define el alto de la imagen
-    .attr("href", d => d.equipo.logo)  // Utiliza la URL del logo
+    .attr("href", d => 'https://cdn.sofifa.net/teams/19/240.png')  // Utiliza la URL del logo
     .attr("x", d => escalaX(d.index) - 20) // Centra la imagen en el eje X
     .attr("transform", `translate(${(escalaX(4.5) - escalaX(2)) / 2}, 0)`)
     .attr("y", d => escalaY(d.puntuacion) - 20); // Centra la imagen en el eje Y
