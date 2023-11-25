@@ -54,3 +54,10 @@ img{
     padding: 5px;
     font-weight: bolder;
 }
+
+.axis-label {
+    font-size: 25px;
+    font-family:'Inter', sans-serif;
+    fill: white; /* Color del texto */
+
+}

@@ -7,7 +7,7 @@ const data = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data
 
 const premier_league_teams = {'Arsenal': '#ef0107',
 'Aston Villa': '#490024',
-'Bournemouth': '#6d140e',
+'AFC Bournemouth': '#6d140e',
 'Brentford': '#a47f0e',
 'Brighton & Hove Albion': '#0000fd',
 'Chelsea': '#004f97',
@@ -20,7 +20,7 @@ const premier_league_teams = {'Arsenal': '#ef0107',
 'Manchester City': '#6cabdd',
 'Manchester United': '#fbe122',
 'Newcastle United': '#241f20',
-'Nottingham Forest': '#ff00f4',
+'Nottingham Forest': '#ffffff',
 'Southampton': '#d8393e',
 'Tottenham Hotspur': '#132257',
 'West Ham United': '#7a263a',
@@ -28,28 +28,26 @@ const premier_league_teams = {'Arsenal': '#ef0107',
   
 
 // Tamaños
-const scala = 0.85;
-const WIDTH_VIS_1 = 1450*scala;
-const HEIGHT_VIS_1 = 800*scala;
+const scala = 1;
+const WIDTH_VIS_1 = 1200*scala;
+const HEIGHT_VIS_1 = 900*scala;
 
 const WIDTH_VIS_2 = 800;
 const HEIGHT_VIS_2 = 800;
 
 const MARGIN = {
-    top: 30,
-    bottom: 30,
-    left: 19.5,
-    right: 70,
+    top: 0,
+    bottom: 45,
+    left: 45,
+    right: 48,
   };
-
-
 
 SVG1.attr("width", WIDTH_VIS_1).attr("height", HEIGHT_VIS_1);
 SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
 
 const container2 = SVG1.append("g").attr(
     "transform",
-    `translate(${MARGIN.left} ${MARGIN.top})`
+    `translate(${MARGIN.left} ${MARGIN.top + MARGIN.bottom})`
   );
 
 loadingData();
@@ -114,6 +112,8 @@ function createMultilineChart(data, data_fifa) {
         index: n 
     }));
 
+    
+
 
 
     // Creamos escalas
@@ -124,30 +124,50 @@ function createMultilineChart(data, data_fifa) {
 
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const escalaX = d3.scaleLinear([1, n], [0, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
-    const escalaY = d3.scaleLinear([1, n_teams], [0, HEIGHT_VIS_1 - 2 * MARGIN.bottom]);
+    const escalaX = d3.scaleLinear([0, n], [0, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
+    const escalaY = d3.scaleLinear([1, n_teams + 1], [0, HEIGHT_VIS_1 - 2 * MARGIN.bottom]);
 
     // Creamos ejes
-    const ejeX = d3.axisBottom(escalaX).ticks(n);
-    const ejeY = d3.axisLeft(escalaY).ticks(n_teams);
+    const ejeX = d3.axisBottom(escalaX).ticks(n).tickFormat(d => d < 39 ? d : '');
+    const ejeY = d3.axisLeft(escalaY).ticks(n_teams).tickFormat(d => d < 21 ? d : '');
 
     // Agregamos ejes
     SVG1.append('g')
-        .attr("transform",`translate(${MARGIN.left}, ${MARGIN.top + HEIGHT_VIS_1 - 2 * MARGIN.bottom})`)
+        .attr("class", "x-axis")
+        .attr("transform",`translate(${MARGIN.left}, ${MARGIN.top + HEIGHT_VIS_1 - MARGIN.bottom})`)
         .call(ejeX)
         .selectAll("line")
-        .attr("y1", -(HEIGHT_VIS_1 - 2 * MARGIN.bottom))
+        .attr("y1", -(HEIGHT_VIS_1 - MARGIN.bottom - MARGIN.top - MARGIN.bottom))
         .attr("stroke-dasharray", "5")
         .attr("opacity", 0.4);
         
     SVG1.append('g')
-        .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`)
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top + MARGIN.bottom})`)
         .call(ejeY)
         .selectAll("line")
-        .attr("x1", WIDTH_VIS_1 - 2 * MARGIN.left)
+        .attr("x1", WIDTH_VIS_1 - MARGIN.left - MARGIN.right)
         .attr("stroke-dasharray", "5")
         .attr("opacity", 0.4);
-        
+
+    // Agregamos Label eje X
+    SVG1.append("text")
+        .attr("class", "axis-label")
+        .attr("x", 0 )
+        .attr("y", 0 )
+        .attr("transform", `translate(${ WIDTH_VIS_1 / 2}, ${HEIGHT_VIS_1 - MARGIN.bottom + MARGIN.top + 20 * 2})`)
+        .style("text-anchor", "middle")
+        .text("Jornada de la Liga");
+
+    // Agregamos Label eje Y
+    SVG1.append("text")
+        .attr("class", "axis-label")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("transform", `translate(${MARGIN.left - 27}, ${HEIGHT_VIS_1/2}) rotate(-90)`)
+        .style("text-anchor", "middle")
+        .text("Posición en la Tabla");
+    
 
     // Creamos lineas y puntos
     let lines = d3.line()
@@ -178,30 +198,118 @@ function createMultilineChart(data, data_fifa) {
     
     
     // Logo clubes    
-    // // Dibujar el círculo extra para cada serie
-    // container2.selectAll("circle.extra")
-    //     .data(extraPoints)
-    //     .join("circle")
-    //     .attr("class", "extra")
-    //     .attr("r", 20)
-    //     .attr("fill", d => premier_league_teams[d.equipo.equipo])
-    //     .attr("cx", d => escalaX(d.index))
-    //     .attr("transform", `translate(${(escalaX(4.5)- escalaX(2))/2 }, 0)`)
-    //     .attr("cy", d => escalaY(d.puntuacion));
-
+    SVG1.selectAll("image.extra")
+        .data(extraPoints)
+        .join("image")
+        .attr("class", "extra")
+        .attr("width", 40)  
+        .attr("height", 40) 
+        .attr("href", d => data_fifa.filter(a => a.club === d.equipo.equipo)[0].club_logo) 
+        .attr("x", d => escalaX(d.index) + MARGIN.left - 20) 
+        .attr("y", d => escalaY(d.puntuacion) + MARGIN.top + MARGIN.bottom - 20); 
     
+    
+    // Definir el clipPath
+    let clip = SVG1.append("defs")
+        .append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", WIDTH_VIS_1 - MARGIN.left - MARGIN.right+15) 
+        .attr("height", HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom + 100)
+        .attr("x", -10)
+        .attr("y", MARGIN.top-10);
 
-    container2.selectAll("image.extra")
-    .data(extraPoints)
-    .join("image")
-    .attr("class", "extra")
-    .attr("width", 40)  // Define el ancho de la imagen
-    .attr("height", 40) // Define el alto de la imagen
-    .attr("href", d => console.log(data_fifa.filter(a => a.club === d.equipo.equipo)[0].club_logo, d.equipo.equipo))  // Utiliza la URL del logo
-    .attr("x", d => escalaX(d.index) - 20) // Centra la imagen en el eje X
-    .attr("transform", `translate(${(escalaX(4.5) - escalaX(2)) / 2}, 0)`)
-    .attr("y", d => escalaY(d.puntuacion) - 20); // Centra la imagen en el eje Y
+    // Aplicar el clipPath a los elementos que no deben superponerse sobre los ejes
+    container2.attr("clip-path", "url(#clip)");
+
+    // Efecto de zoom
+    const zoom = d3.zoom()
+        .scaleExtent([1, 20])  // Limites de zoom, 1 = sin zoom, 10 = máximo zoom
+        .translateExtent([
+            [0, 0], 
+            [WIDTH_VIS_1 - MARGIN.left - MARGIN.right+100, HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom]
+        ])
+        .on("zoom", zoomed);
+
+    // Aplicar la función de zoom al SVG o un grupo dentro del SVG
+    SVG1.call(zoom);
+
+    const formatTicks = d => Math.floor(d) === d ? d : "";
+
+    // Función que se llama cuando se hace zoom
+    function zoomed(event) {
+        // Escala el eje X
+        const newXScale = event.transform.rescaleX(escalaX);
+
+        // Actualiza el eje X con el formato personalizado
+        SVG1.select(".x-axis")
+            .call(d3.axisBottom(newXScale)
+            .tickValues(d3.range(0, n, 1).filter(d => newXScale(d) >= 0 && newXScale(d) <= WIDTH_VIS_1)) // Asegura que los ticks sean de a 1
+            .tickFormat(formatTicks));
+
+        // Actualiza la cuadrícula (si la estás utilizando)
+        SVG1.selectAll(".grid-line") // Asegúrate de que esté utilizando una clase apropiada para seleccionarlas
+            .attr("x1", d => newXScale(d))
+            .attr("x2", d => newXScale(d));
+            const maxXVisible = newXScale.invert(WIDTH_VIS_1 - MARGIN.left - MARGIN.right);
+
+        SVG1.selectAll("image.extra")
+        .transition()
+        .duration(500)
+        .attrTween("y", function(d) {
+            const lastVisiblePoint = flattenedData.filter(p => p.equipo.equipo === d.equipo.equipo && newXScale(p.index) <= WIDTH_VIS_1 - MARGIN.right).pop();
+            const yStart = d3.select(this).attr("y");
+            let yEnd;
+        
+            if (lastVisiblePoint) {
+                yEnd = escalaY(lastVisiblePoint.puntuacion) + MARGIN.top + MARGIN.bottom - 20;
+            } else {
+                yEnd = yStart;
+            }
+        
+            return d3.interpolateNumber(yStart, yEnd);
+        });
+
+
+        // Actualiza las líneas y puntos para que coincidan con la nueva escala
+        lines.x(d => newXScale(d.index));
+        container2.selectAll('path').attr('d', ([d, val]) => lines(val));
+        container2.selectAll("circle").attr("cx", (d) => newXScale(d.index));
+   
+
+
+        
+        
 }
+    
+       
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -408,6 +516,8 @@ function crearSatelites(dataset, categoria, filtrar_dataset, ordenar_dataset) {
 
     joinDeDatos(datos); // Dibujamos los satélites
     joinDeDatos(datos); // Hacemos el update
+
+    
 
 
 }
