@@ -28,8 +28,9 @@ const premier_league_teams = {'Arsenal': '#ef0107',
   
 
 // Tamaños
-const WIDTH_VIS_1 = 1100;
-const HEIGHT_VIS_1 = 800;
+const scala = 0.85;
+const WIDTH_VIS_1 = 1450*scala;
+const HEIGHT_VIS_1 = 800*scala;
 
 const WIDTH_VIS_2 = 800;
 const HEIGHT_VIS_2 = 800;
@@ -196,7 +197,7 @@ function createMultilineChart(data, data_fifa) {
     .attr("class", "extra")
     .attr("width", 40)  // Define el ancho de la imagen
     .attr("height", 40) // Define el alto de la imagen
-    .attr("href", d => 'https://cdn.sofifa.net/teams/19/240.png')  // Utiliza la URL del logo
+    .attr("href", d => console.log(data_fifa.filter(a => a.club === d.equipo.equipo)[0].club_logo, d.equipo.equipo))  // Utiliza la URL del logo
     .attr("x", d => escalaX(d.index) - 20) // Centra la imagen en el eje X
     .attr("transform", `translate(${(escalaX(4.5) - escalaX(2)) / 2}, 0)`)
     .attr("y", d => escalaY(d.puntuacion) - 20); // Centra la imagen en el eje Y
