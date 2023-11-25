@@ -2,26 +2,26 @@ const SVG1= d3.select("#vis-1").append("svg"); // MultiLineChart
 const SVG2 = d3.select("#vis-2").append("svg"); // Circular Packing
 
 const EV_PL = 'data\data_Procesada\proyecto_data_ev_table_premier_league_2022_2023.csv';
-const FIFA = 'data\data_Procesada\proyecto_data_fifa.csv';
+const FIFA = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_fifa_23.csv';
 const data = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_ev_table_premier_league_2022_2023.json'
 
 const premier_league_teams = {'Arsenal': '#ef0107',
 'Aston Villa': '#490024',
-'Bournemouth': '#da291c',
-'Brentford': '#e30613',
-'Brighton & Hove Albion': '#0057b8',
-'Chelsea': '#034694',
-'Crystal Palace': '#1b458f',
-'Everton': '#003399',
-'Fulham': '#cc0000',
-'Leeds United': '#ffcd00',
-'Leicester City': '#003090',
-'Liverpool': '#c8102e',
+'Bournemouth': '#6d140e',
+'Brentford': '#a47f0e',
+'Brighton & Hove Albion': '#0000fd',
+'Chelsea': '#004f97',
+'Crystal Palace': '#9fbfdd',
+'Everton': '#243bff',
+'Fulham': '#5b5b5b',
+'Leeds United': '#ddff2b',
+'Leicester City': '#7866d5',
+'Liverpool': '#00b2a9',
 'Manchester City': '#6cabdd',
-'Manchester United': '#da291c',
+'Manchester United': '#fbe122',
 'Newcastle United': '#241f20',
-'Nottingham Forest': '#d00000',
-'Southampton': '#d71920',
+'Nottingham Forest': '#ff00f4',
+'Southampton': '#d8393e',
 'Tottenham Hotspur': '#132257',
 'West Ham United': '#7a263a',
 'Wolverhampton Wanderers': '#fdb913'};
@@ -35,10 +35,10 @@ const WIDTH_VIS_2 = 800;
 const HEIGHT_VIS_2 = 800;
 
 const MARGIN = {
-    top: 70,
-    bottom: 70,
+    top: 30,
+    bottom: 30,
     left: 19.5,
-    right: 50,
+    right: 70,
   };
 
 
@@ -63,15 +63,35 @@ function loadingData() {
             puntuaciones: item.puntuaciones,
         }
         ));
+    
+        d3.json(FIFA).then(d => {
+            console.log(d)
+
+            let data_fifa = d.map(item => ({
+                // ID,Name,Age,Photo,Nationality,Flag,Overall,Potential,Club,Club Logo
+                id: item.ID,
+                name: item.Name,
+                age: item.Age,
+                photo: item.Photo,
+                nationality: item.nationality,
+                flag: item.Flag,
+                overall: item.Overall,
+                potential: item.Potential,
+                club: item.Club,
+                club_logo: item['Club Logo'],
+                real_face: item['Real Face'],
+            }
+            ));
 
         
-        createMultilineChart(data_ev);
+            createMultilineChart(data_ev, data_fifa);
+        })
     })
 }
 
 
 
-function createMultilineChart(data) {
+function createMultilineChart(data, data_fifa) {
     
     const n = data[0].puntuaciones.length ;// Total de partidos
     const n_teams = data.length;
@@ -150,7 +170,7 @@ function createMultilineChart(data) {
     container2.selectAll("circle")
         .data(flattenedData)
         .join("circle")
-        .attr("r", 6)
+        .attr("r", 5)
         .attr("fill",  (d) => premier_league_teams[d.equipo.equipo])
         .attr("cx", (d) => escalaX(d.index))
         .attr("cy", (d) => escalaY(d.puntuacion));
@@ -158,16 +178,26 @@ function createMultilineChart(data) {
     
     
     // Logo clubes    
-    // Dibujar el círculo extra para cada serie
-    container2.selectAll("circle.extra")
-        .data(extraPoints)
-        .join("circle")
-        .attr("class", "extra")
-        .attr("r", 20)
-        .attr("fill", d => premier_league_teams[d.equipo.equipo])
-        .attr("cx", d => escalaX(d.index))
-        .attr("transform", `translate(${(escalaX(1)- escalaX(0))/3 }, 0)`)
-        .attr("cy", d => escalaY(d.puntuacion));
+    // // Dibujar el círculo extra para cada serie
+    // container2.selectAll("circle.extra")
+    //     .data(extraPoints)
+    //     .join("circle")
+    //     .attr("class", "extra")
+    //     .attr("r", 20)
+    //     .attr("fill", d => premier_league_teams[d.equipo.equipo])
+    //     .attr("cx", d => escalaX(d.index))
+    //     .attr("transform", `translate(${(escalaX(4.5)- escalaX(2))/2 }, 0)`)
+    //     .attr("cy", d => escalaY(d.puntuacion));
+    container2.selectAll("image.extra")
+    .data(extraPoints)
+    .join("image")
+    .attr("class", "extra")
+    .attr("width", 40)  // Define el ancho de la imagen
+    .attr("height", 40) // Define el alto de la imagen
+    .attr("href", d => d.equipo.logo)  // Utiliza la URL del logo
+    .attr("x", d => escalaX(d.index) - 20) // Centra la imagen en el eje X
+    .attr("transform", `translate(${(escalaX(4.5) - escalaX(2)) / 2}, 0)`)
+    .attr("y", d => escalaY(d.puntuacion) - 20); // Centra la imagen en el eje Y
 }
 
 
