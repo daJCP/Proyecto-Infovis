@@ -32,7 +32,7 @@ const premier_league_teams = {'Arsenal': '#ef0107',
 // <>>>>>><<<<<<<>>>>< Visualización 1 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
 // Tamaños
-const scala = 0.8;
+const scala = 0.7;
 const WIDTH_VIS_1 = 1500*scala;
 const HEIGHT_VIS_1 = 900*scala;
 
@@ -483,34 +483,19 @@ function createSelector(data, data_fifa) {
         .attr("x",  ((escalaEquipos(2) - escalaEquipos(1)))*0.5*img_scale)
         .attr("y", (escalaEquipos(2) - escalaEquipos(1))/2 * img_scale);
 
-    function highlightTeam(selectedTeam) {
-        // Reduce la opacidad de todos los equipos
-        console.log(selectedTeam);
-
-        // container2 seleccionar todos los path y circle con 0.1 de opacidad
-
-        container2.selectAll('path')
-            .attr('opacity', 0.1);
-        container2.selectAll('circle')
-            .attr('opacity', 0.1);
-    
+    function highlightTeam(selected) {
         // Aumenta la opacidad del equipo seleccionado
         container2.selectAll('path')
-            .filter(d => d[0].equipo === selectedTeam)
-            .attr('opacity', 1);
+            .attr('opacity',  d => selected.has(d[0].equipo) ? 1 : 0.1);
         container2.selectAll('circle')
-            .filter(d => d.equipo.equipo === selectedTeam)
-            .attr('opacity', 1);
-
+            .attr('opacity',  d => selected.has(d.equipo.equipo) ? 1 : 0.1);
         SVG1.selectAll("image.extra")
-            .attr('opacity', 0.25);
-        SVG1.selectAll("image.extra")
-            .filter(d => d.equipo.equipo === selectedTeam)
-            .attr('opacity', 1);
+            .attr('opacity',  d => selected.has(d.equipo.equipo) ? 1 : 0.3);
         
     }
 
-    function resetVisualization() {
+    function resetVisualization(selected) {
+        selected.clear();
         container2.selectAll('path')
             .attr('opacity', 1);
         container2.selectAll('circle')
@@ -520,18 +505,34 @@ function createSelector(data, data_fifa) {
     }
 
     // Selector de equipo
+    const selected = new Set();
+
     SVG_Selector.selectAll("image:not(.premier_league)")
-    .on('click', (evento, d) => {
-        let texto = `Datos ${d.equipo.equipo} `;
-        d3.selectAll("#selected").text(texto);
-        highlightTeam(d.equipo.equipo);
-    });
+        .on('click', (evento, d) => {
+            if (selected.has(d.equipo.equipo)) {
+                selected.delete(d.equipo.equipo);
+            } else {
+                selected.add(d.equipo.equipo);
+            }
+            let texto = `Datos ${Array.from(selected)
+                .map(team => `<span style="color: ${premier_league_teams[team]};
+                 text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">${team}</span>`)
+                .join(', ')} - Premier League 2022/2023 `;
+            d3.selectAll("#selected").html(texto);
+
+            if (selected.size === 0) {
+                resetVisualization(selected);
+            }
+            else {
+                highlightTeam(selected);
+            }
+        });
 
     SVG_Selector.selectAll("image.premier_league")
         .on('click', () => {
             let texto = `Dato Premier League`;
             d3.selectAll("#selected").text(texto);
-            resetVisualization();
+            resetVisualization(selected);
         });
     
     const movimiento = -((escalaEquipos(2) - escalaEquipos(1)) * img_scale * 0.5);
@@ -542,7 +543,6 @@ function createSelector(data, data_fifa) {
             d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5)
             .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5);
             d3.select(this).raise();
-            // Translate hacia arriba
             d3.select(this).attr('transform', `translate(-10,-20)`);
         })
         .on("mouseout", function() {
@@ -557,10 +557,13 @@ function createSelector(data, data_fifa) {
             d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5)
             .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5);
             d3.select(this).raise();
+            d3.select(this).attr('transform', `translate(-10,-20)`);
         })
         .on("mouseout", function() {
             d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
             .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale);
+            d3.select(this).attr('transform', `translate(0,-20)`);
+            d3.select(this).transition().duration(1000*0.1).attr('transform', `translate(0,0)`);
         });
 
     
