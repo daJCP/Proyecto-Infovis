@@ -679,8 +679,11 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
         data_pl_2023_players_selected = data_pl_2023_players;
     }
     else{
+        console.log(data_pl_2023_players);
         data_pl_2023_players_selected = data_pl_2023_players.filter(d => selected.has(d.club));
-    }    
+    }
+
+    console.log(data_pl_2023_players_selected, 'data_pl_2023_players_selected');
 
     let dataHierarchy = {
         name: "equipos",
