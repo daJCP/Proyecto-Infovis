@@ -54,6 +54,28 @@ const container2 = SVG1.append("g").attr(
     `translate(${MARGIN.left} ${MARGIN.top + MARGIN.bottom})`
   );
 
+function extraerYLimpiarApellido(nombre) {
+    let nombreSinNumeros = nombre.replace(/[0-9]/g, '');
+    let partes = nombreSinNumeros.split(' ');
+    return partes[partes.length - 1].toLowerCase();
+}
+
+function esMismaPersona(nombre1, nombre2) {        
+
+    let apellido1 = extraerYLimpiarApellido(nombre1);
+    let apellido2 = extraerYLimpiarApellido(nombre2);
+
+    let inicial1 = nombre1[0].toLowerCase();
+    let inicial2 = nombre2[0].toLowerCase();
+
+    // if (selected.size > 0 && apellido2 === 'akanji' && inicial1 === 'm') {
+    //     console.log(apellido1, apellido2);
+    //     console.log(inicial1, inicial2);
+    // }
+
+    return apellido1 === apellido2 && inicial1 === inicial2 ;
+}
+
 loadingData();
 
 function loadingData() {
@@ -74,7 +96,7 @@ function loadingData() {
                 name: item.Name,
                 age: item.Age,
                 photo: item.Photo,
-                nationality: item.nationality,
+                nationality: item.Nationality,
                 flag: item.Flag,
                 overall: item.Overall,
                 potential: item.Potential,
@@ -137,8 +159,28 @@ function loadingData() {
                         link: item.link
                     }
                     ));
-                    createMultilineChart(data_ev, data_fifa);
-                    createSelector(data_ev, data_fifa, data_pl_2023_players, data_pl_2023_stats);
+
+                    const extraPoints = data_ev.map(equipo => ({
+                        equipo
+                    }));
+
+                    let apellidosMap = new Map();
+                    data_pl_2023_players.forEach(seleccionado => {
+                        let apellido = extraerYLimpiarApellido(seleccionado.player);
+                        if (!apellidosMap.has(apellido)) {
+                            apellidosMap.set(apellido, []);
+                        }
+                        apellidosMap.get(apellido).push(seleccionado.player);
+                    });
+
+                    let data_filtrada = data_fifa.filter(fifa_player => {
+                        let apellidoFifaPlayer = extraerYLimpiarApellido(fifa_player.name);
+                        return apellidosMap.has(apellidoFifaPlayer);
+                    });
+
+                    createMultilineChart(data_ev, data_filtrada);
+                    createSelector(data_ev, data_filtrada, data_pl_2023_players, data_pl_2023_stats);
+                    
                     
                 })
             })
@@ -673,18 +715,34 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
 
     // data_pl_2023_players extrae los que tengan de nombre de equipo en selected
     let data_pl_2023_players_selected;
-    console.log(selected, 'Selected');
+    // console.log(selected, 'Selected');
 
     if (selected.size === 0) {
         data_pl_2023_players_selected = data_pl_2023_players;
     }
     else{
-        console.log(data_pl_2023_players);
+        // console.log(data_pl_2023_players);
         data_pl_2023_players_selected = data_pl_2023_players.filter(d => selected.has(d.club));
     }
 
-    console.log(data_pl_2023_players_selected, 'data_pl_2023_players_selected');
+    function revisamosEdad(edad_fifa, edad_seleccionado) {
+        edad_fifa = parseInt(edad_fifa);
+        edad_seleccionado = parseInt(edad_seleccionado);
 
+        return edad_fifa - 1 === edad_seleccionado || edad_fifa + 1 === edad_seleccionado || edad_seleccionado === edad_fifa;
+    }
+
+    // Obtenemos la data de fifa filtrada por jugadores
+    let data_filtrada = data_fifa.filter(fifa_player => 
+        data_pl_2023_players_selected.some(seleccionado =>
+            esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
+        )
+    );
+
+    console.log(data_filtrada, 'data_filtrada');
+
+
+    // Generar data jerarquizada para el pack layout
     let dataHierarchy = {
         name: "equipos",
         children: Array.from(
@@ -706,29 +764,24 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
     
     console.log(dataHierarchy, 'dataHierarchy');
 
-    const n =  data.length;
-    const extraPoints = data.map(equipo => ({
-        equipo,
-        puntuacion: equipo.puntuaciones[ n - 1],
-        index: n
-    }));
-    
+
+    // Seteamos el root
     var root = d3.hierarchy(dataHierarchy)
       .sum(d => d.value);
-
     pack(root);
 
+    // Creamos un grupo para cada nodo
     let node = SVG2.selectAll(".node")
         .data(root.descendants());
     
-    // EXIT: Elimina los nodos que ya no son necesarios
+    // Eliminamos los nodos que ya no son necesarios
     node.exit().remove();
     
-    // ENTER: Crea nuevos elementos para nuevos datos
+    // Se crea nuevos nodos para nuevos datos
     let nodeEnter = node.enter().append("g")
         .attr("class", "node");
     
-    // ENTER + UPDATE: Actualiza todos los nodos existentes y nuevos
+    // Actualizamos todos los nodos existentes y nuevos
     node = nodeEnter.merge(node);
     
     node.attr("transform", d => `translate(${d.x + MARGIN_2.left*2}, ${d.y + MARGIN_2.top*2})`);
