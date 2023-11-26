@@ -68,12 +68,14 @@ function esMismaPersona(nombre1, nombre2) {
     let inicial1 = nombre1[0].toLowerCase();
     let inicial2 = nombre2[0].toLowerCase();
 
-    // if (selected.size > 0 && apellido2 === 'akanji' && inicial1 === 'm') {
-    //     console.log(apellido1, apellido2);
-    //     console.log(inicial1, inicial2);
-    // }
-
     return apellido1 === apellido2 && inicial1 === inicial2 ;
+}
+
+function revisamosEdad(edad_fifa, edad_seleccionado) {
+    edad_fifa = parseInt(edad_fifa);
+    edad_seleccionado = parseInt(edad_seleccionado);
+
+    return edad_fifa - 1 === edad_seleccionado || edad_fifa + 1 === edad_seleccionado || edad_seleccionado === edad_fifa;
 }
 
 loadingData();
@@ -164,19 +166,28 @@ function loadingData() {
                         equipo
                     }));
 
-                    let apellidosMap = new Map();
-                    data_pl_2023_players.forEach(seleccionado => {
-                        let apellido = extraerYLimpiarApellido(seleccionado.player);
-                        if (!apellidosMap.has(apellido)) {
-                            apellidosMap.set(apellido, []);
-                        }
-                        apellidosMap.get(apellido).push(seleccionado.player);
-                    });
 
-                    let data_filtrada = data_fifa.filter(fifa_player => {
-                        let apellidoFifaPlayer = extraerYLimpiarApellido(fifa_player.name);
-                        return apellidosMap.has(apellidoFifaPlayer);
-                    });
+                    
+
+                    // const preprocesadosPLPlayers = data_pl_2023_players.map(seleccionado => ({
+                    //     player: seleccionado.player,
+                    //     edadValida: data_fifa.some(fifa_player => revisamosEdad(fifa_player.age, seleccionado.age))
+                    // })).filter(seleccionado => seleccionado.edadValida);
+
+                    // const data_filtrada = data_fifa.filter(fifa_player =>
+                    //     preprocesadosPLPlayers.find(seleccionado =>
+                    //         esMismaPersona(fifa_player.name, seleccionado.player)
+                    //     )
+                    // );
+
+
+                    let data_filtrada = data_fifa.filter(fifa_player => 
+                        data_pl_2023_players.some(seleccionado =>
+                            esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
+                        )
+                    );
+
+                    // let data_filtrada = data_fifa;
 
                     createMultilineChart(data_ev, data_filtrada);
                     createSelector(data_ev, data_filtrada, data_pl_2023_players, data_pl_2023_stats);
@@ -725,21 +736,25 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
         data_pl_2023_players_selected = data_pl_2023_players.filter(d => selected.has(d.club));
     }
 
-    function revisamosEdad(edad_fifa, edad_seleccionado) {
-        edad_fifa = parseInt(edad_fifa);
-        edad_seleccionado = parseInt(edad_seleccionado);
-
-        return edad_fifa - 1 === edad_seleccionado || edad_fifa + 1 === edad_seleccionado || edad_seleccionado === edad_fifa;
+    // Obtenemos la data de fifa filtrada por jugadores
+    if (selected.size === 0) {
+        data_filtrada = data_fifa;
+    }
+    else{
+        data_filtrada = data_fifa.filter(fifa_player => 
+                data_pl_2023_players_selected.some(seleccionado =>
+                    esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
+                )
+            );
     }
 
-    // Obtenemos la data de fifa filtrada por jugadores
-    let data_filtrada = data_fifa.filter(fifa_player => 
-        data_pl_2023_players_selected.some(seleccionado =>
-            esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
-        )
-    );
+    // let data_filtrada = data_fifa.filter(fifa_player => 
+    //     data_pl_2023_players_selected.some(seleccionado =>
+    //         esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
+    //     )
+    // );
 
-    console.log(data_filtrada, 'data_filtrada');
+    // console.log(data_filtrada, 'data_filtrada');
 
 
     // Generar data jerarquizada para el pack layout
@@ -788,7 +803,7 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
     
     node.append("circle")
         .attr("r", d => d.r)
-        .style("fill", d => d.depth === 1 ? `url(#logo-${d.data.name})` : "black")
+        .style("fill", d => d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "black")
         .style("stroke", "purple");
     
     // Añadir texto
