@@ -4,6 +4,8 @@ const SVG_Selector = d3.select("#vis-selector").append("svg"); // Selector
 
 const PL_Logo = 'https://www.premierleague.com/resources/rebrand/v7.133.4/i/elements/pl-main-logo.png'
 
+const PL_2023_Players = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/premier_2022_2023_players.csv'
+const PL_2023_STATS = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/premier_2022_2023.csv'
 const EV_PL = 'data\data_Procesada\proyecto_data_ev_table_premier_league_2022_2023.csv';
 const FIFA = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_fifa_23.csv';
 const data = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_ev_table_premier_league_2022_2023.json'
@@ -28,6 +30,8 @@ const premier_league_teams = {'Arsenal': '#ef0107',
 'Tottenham Hotspur': '#132257',
 'West Ham United': '#7a263a',
 'Wolverhampton Wanderers': '#fdb913'};
+
+
   
 // <>>>>>><<<<<<<>>>>< Visualización 1 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
@@ -80,9 +84,64 @@ function loadingData() {
             }
             ));
 
-        
-            createMultilineChart(data_ev, data_fifa);
-            createSelector(data_ev, data_fifa);
+            d3.csv(PL_2023_Players).then(d => {
+
+                let data_pl_2023_players = d.map(item => ({
+                    // Player	Nation	Pos	Age	MP	Starts	Min	90s	Gls	Ast	G+A	G-PK	PK	PKatt	CrdY	CrdR	xG	npxG	xAG	npxG+xAG	PrgC	PrgP	PrgR	Gls	Ast	G+A	G-PK	G+A-PK	xG	xAG	xG+xAG	npxG	npxG+xAG	Matches	club
+                    player: item.Player,
+                    nation: item.Nation,
+                    pos: item.Pos,
+                    age: item.Age,
+                    mp: item.MP,
+                    starts: item.Starts,
+                    min: item.Min,
+                    x90s: item["90s"],
+                    gls: item.Gls,
+                    ast: item.Ast,
+                    ga: item["G+A"],
+                    gp: item["G-PK"],
+                    pk: item.PK,
+                    pkatt: item.PKatt,
+                    crdy: item.CrdY,
+                    crdr: item.CrdR,
+                    xg: item.xG,
+                    npxg: item.npxG,
+                    xag: item.xAG,
+                    club: item.club,
+                }
+                ));
+
+                d3.csv(PL_2023_STATS).then(d => {
+
+                    let data_pl_2023_stats = d.map(item => ({
+                        // Rk	Squad	MP	W	D	L	GF	GA	GD	Pts	Pts/MP	xG	xGA	xGD	xGD/90	Attendance	Top Team Scorer	Goalkeeper	Notes	link
+                        rk: item.Rk,
+                        squad: item.Squad,
+                        mp: item.MP,
+                        w: item.W,
+                        d: item.D,
+                        l: item.L,
+                        gf: item.GF,
+                        ga: item.GA,
+                        gd: item.GD,
+                        pts: item.Pts,
+                        pts_mp: item["Pts/MP"],
+                        xg: item.xG,
+                        xga: item.xGA,
+                        xgd: item.xGD,
+                        xgd_90: item["xGD/90"],
+                        attendance: item.Attendance,
+                        top_team_scorer: item["Top Team Scorer"],
+                        goalkeeper: item.Goalkeeper,
+                        notes: item.Notes,
+                        link: item.link
+                    }
+                    ));
+                    createMultilineChart(data_ev, data_fifa);
+                    createSelector(data_ev, data_fifa, data_pl_2023_players, data_pl_2023_stats);
+                    
+                })
+            })
         })
     })
 }
@@ -292,7 +351,7 @@ function createMultilineChart(data, data_fifa) {
         .y(d => escalaY(d.puntuacion));
 
 
-    console.log(equipos)
+    // console.log(equipos)
 
     container2.selectAll('path')
         .data(equipos)
@@ -397,30 +456,18 @@ function createMultilineChart(data, data_fifa) {
 // <>>>>>><<<<<<<>>>>< Visualización 2 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
 // Tamaños
-const scala_2 = 0.8;
-
-const WIDTH_VIS_2 = 800;
-const HEIGHT_VIS_2 = 1000;
-
 const WIDTH_VIS_Selector = 1200;
 const HEIGHT_VIS_Selector = 100;
 
-const MARGIN_1 = {
-    top: 0,
-    bottom: 45,
-    left: 45,
-    right: 48,
-  };
-
-SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
 SVG_Selector.attr("width", WIDTH_VIS_Selector).attr("height", HEIGHT_VIS_Selector);
 
-const container1 = SVG1.append("g").attr(
-    "transform",
-    `translate(${MARGIN.left} ${MARGIN.top + MARGIN.bottom})`
-  );
+function createSelector(data, data_fifa, data_pl_2023_players, data_pl_2023_stats) {
 
-function createSelector(data, data_fifa) {
+    // Selector de equipo
+    const selected = new Set();
+
+    createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, selected);
+
     
     const n =  data.length;
     const extraPoints = data.map(equipo => ({
@@ -504,9 +551,6 @@ function createSelector(data, data_fifa) {
             .attr('opacity', 1);
     }
 
-    // Selector de equipo
-    const selected = new Set();
-
     SVG_Selector.selectAll("image:not(.premier_league)")
         .on('click', (evento, d) => {
             if (selected.has(d.equipo.equipo)) {
@@ -514,12 +558,14 @@ function createSelector(data, data_fifa) {
             } else {
                 selected.add(d.equipo.equipo);
             }
+
+            createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, selected);
+
             let texto = `Datos ${Array.from(selected)
                 .map(team => `<span style="color: ${premier_league_teams[team]};
                  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">${team}</span>`)
                 .join(', ')} - Premier League 2022/2023 `;
             d3.selectAll("#selected").html(texto);
-
             if (selected.size === 0) {
                 resetVisualization(selected);
             }
@@ -533,6 +579,7 @@ function createSelector(data, data_fifa) {
             let texto = `Dato Premier League`;
             d3.selectAll("#selected").text(texto);
             resetVisualization(selected);
+            createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, selected);
         });
     
     const movimiento = -((escalaEquipos(2) - escalaEquipos(1)) * img_scale * 0.5);
@@ -564,16 +611,138 @@ function createSelector(data, data_fifa) {
             .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale);
             d3.select(this).attr('transform', `translate(0,-20)`);
             d3.select(this).transition().duration(1000*0.1).attr('transform', `translate(0,0)`);
-        });
-
-    
-        
+        }); 
 }
 
+const MARGIN_2 = {
+    top: 10,
+    bottom: 10,
+    left: 10,
+    right: 10,
+  };
+
+const scala_2 = 0.8;
+
+const WIDTH_VIS_2 = 1250;
+const HEIGHT_VIS_2 = 600;
+
+SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
+
+const SVG2_container = SVG2.append("g").attr(
+    "transform",
+    `translate(${MARGIN_2.left} ${MARGIN_2.top + MARGIN_2.bottom})`
+  );
 
 
+function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, selected) {
 
+    let semiWidth = WIDTH_VIS_2 / 2;
+    let semiHeight = HEIGHT_VIS_2 / 2;
 
+    // Limpiar elementos existentes
+    SVG2.selectAll(".node").remove();
+
+    // Main Background
+    SVG2.append("rect")
+        .attr("x", 0) 
+        .attr("y", 0)
+        .attr("width", WIDTH_VIS_2)
+        .attr("height", HEIGHT_VIS_2) 
+        .attr("fill", "purple");
+
+    // Background    
+    SVG2.append('rect')
+        .raise()
+        .attr('x', MARGIN_2.left)
+        .attr('y', MARGIN_2.top)
+        .attr('width', WIDTH_VIS_2- MARGIN_2.left -  MARGIN_2.right)
+        .attr('height', HEIGHT_VIS_2- MARGIN_2.top - MARGIN_2.bottom)
+        .attr('fill', 'black');
+
+    // Cuadrilla izquierda
+    SVG2.append('rect')
+        .attr("x", MARGIN_2.left*2)
+        .attr("y", MARGIN_2.top*2)
+        .attr("width", semiWidth - MARGIN_2.left*4)
+        .attr("height", HEIGHT_VIS_2-MARGIN_2.bottom*2 - MARGIN_2.top*2)
+        .style("stroke", "purple");
+    
+    let pack = d3.pack()
+        .size([semiWidth - MARGIN_2.left*4, HEIGHT_VIS_2-MARGIN_2.bottom*2 - MARGIN_2.top*2])
+        .padding(2); 
+
+    // data_pl_2023_players extrae los que tengan de nombre de equipo en selected
+    let data_pl_2023_players_selected;
+    console.log(selected, 'Selected');
+
+    if (selected.size === 0) {
+        data_pl_2023_players_selected = data_pl_2023_players;
+    }
+    else{
+        data_pl_2023_players_selected = data_pl_2023_players.filter(d => selected.has(d.club));
+    }    
+
+    let dataHierarchy = {
+        name: "equipos",
+        children: Array.from(
+          // Agrupar por equipo
+          d3.group(data_pl_2023_players_selected, d => d.club), 
+          ([name, players]) => ({
+            name,
+            children: Array.from(
+              // Agrupar por nacionalidad dentro de cada equipo
+              d3.group(players, d => d.nation),
+              ([name, players]) => ({
+                name,
+                value: players.length // El tamaño del círculo será proporcional al número de jugadores
+              })
+            )
+          })
+        )
+      };
+    
+    console.log(dataHierarchy, 'dataHierarchy');
+
+    const n =  data.length;
+    const extraPoints = data.map(equipo => ({
+        equipo,
+        puntuacion: equipo.puntuaciones[ n - 1],
+        index: n
+    }));
+    
+    var root = d3.hierarchy(dataHierarchy)
+      .sum(d => d.value);
+
+    pack(root);
+
+    let node = SVG2.selectAll(".node")
+        .data(root.descendants());
+    
+    // EXIT: Elimina los nodos que ya no son necesarios
+    node.exit().remove();
+    
+    // ENTER: Crea nuevos elementos para nuevos datos
+    let nodeEnter = node.enter().append("g")
+        .attr("class", "node");
+    
+    // ENTER + UPDATE: Actualiza todos los nodos existentes y nuevos
+    node = nodeEnter.merge(node);
+    
+    node.attr("transform", d => `translate(${d.x + MARGIN_2.left*2}, ${d.y + MARGIN_2.top*2})`);
+    
+    node.append("circle")
+        .attr("r", d => d.r)
+        .style("fill", d => d.depth === 1 ? `url(#logo-${d.data.name})` : "black")
+        .style("stroke", "purple");
+    
+    // Añadir texto
+    // node.append("text")
+    //     .attr("dy", ".3em")
+    //     .style("text-anchor", "middle")
+    //     .text(d => d.depth === 2 ? d.data.name : '')  // Solo mostrar texto en nodos hoja
+    //     .style("font-size", d => Math.max(10, d.r / 5)) // Ajusta el tamaño del texto en función del radio del círculo, con un mínimo
+    //     .style("fill", "white");    
+}
 
 
 
@@ -585,404 +754,7 @@ function createSelector(data, data_fifa) {
 // <>>>>>><<<<<<<>>>>< Visualización 3 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
 
-function crearSistemaSolar() {
-    /* 
-    Esta función utiliza el dataset indicado en PLANETAS para crear el
-    sistema solar.
-    En esta están todos los planetas, pero no está el sol. Este último
-    debe ser dibujado manualmente. El resto se debe dibujar aplicando datajoin 
-    */
-    d3.json(PLANETAS).then(d => {
-
-        let data_planetas = d.map(item => ({
-            planet: item.planet,
-            diameter: +item.diameter,
-            distance_from_sun: +item.distance_from_sun,
-            mean_temperature: +item.mean_temperature,
-        }
-        ));
-
-        plot_planetas(data_planetas);
-    })
-
-    /* 
-    Cada vez que se haga click en un planeta. Debes llamar a
-    preprocesarSatelites(categoria, false) donde "categoria" 
-    el valor indicado en la constante CATEGORIAS_POR_PLANETA
-    según el planeta seleccionado.
-    Esta función se encargará de llamar a crearSatelites(...)
-    */
-}
-
-function plot_planetas(data_planetas) {
-
-    // Creamos escala distancias planetas con el sol
-    let sunDiameter = WIDTH_VIS_1*0.3;
-    let minDist = d3.min(data_planetas, d => d.distance_from_sun);
-    let maxDist = d3.max(data_planetas, d => d.distance_from_sun);
-    let escalaDist = d3.scaleLog().domain([minDist, maxDist]).range([minDist/sunDiameter * WIDTH_VIS_1, WIDTH_VIS_1*0.97]);
-    
-    
-    // Creamos escala de colores en base a temperaturas
-    let minTemp = d3.min(data_planetas, d => d.mean_temperature);
-    let maxTemp = d3.max(data_planetas, d => d.mean_temperature);
-    let escalaColores = d3.scaleDiverging(t => d3.interpolateRdBu(1 - t))
-    .domain([minTemp, 0, maxTemp])
-
-    // Creamos escala diametros
-    let minDiameter = d3.min(data_planetas, d => d.diameter);
-    let maxDiameter = d3.max(data_planetas, d => d.diameter);
-    
-    let escalaDiametro = d3.scaleLinear([minDiameter, maxDiameter], [sunDiameter*0.05, sunDiameter*0.4]);
-    
-
-    // Agregamos los planetas
-    let planetasG = SVG1.append('g').attr('id', 'planetasG');
-    
-    console.log(data_planetas);
-    console.log(maxDist);
-
-    const font_size = 10;
-
-    // Agregamos las elipses
-    planetasG.selectAll('ellipse')
-        .data(data_planetas)
-        .join('ellipse')
-        .attr('cx', 0)
-        .attr('cy', HEIGHT_VIS_1/2)
-        .attr('rx', d => escalaDist(d.distance_from_sun))
-        .attr('ry', d => sunDiameter/2 + escalaDist(d.distance_from_sun)*0.13)
-        .attr('fill', 'none')
-        .attr('stroke', 'grey')
-        .attr('stroke-width', 1)
-    
-    
-
-    // Agregamos los planetas
-
-    const tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("position", "absolute")
-        .style("visibility", "hidden")
-        .style("background", "grey")  
-        .style("border", "1px solid black")  
-        .style("padding", "5px")
-        .style("color", "black");
-
-    planetasG
-        .selectAll("circle")
-        .data(data_planetas)
-        .join('circle')
-        .attr('distancia', d => CATEGORIAS_POR_PLANETA[d.planet])
-        .attr("cx", d => escalaDist(d.distance_from_sun))
-        .attr("cy", HEIGHT_VIS_1/2)
-        .attr("r", d => escalaDiametro(d.diameter)/2)
-        .attr('fill', d => escalaColores(d.mean_temperature))
-        .on("click", (evento, data_planetas) => {
-            // Generamos los satelites
-            preprocesarSatelites(CATEGORIAS_POR_PLANETA[data_planetas.planet], false);
-        })
-        .on("mouseover", function(evento, d) {
-            // Mostrar tooltip
-            tooltip.style("left", (evento.pageX + 10) + "px")
-                   .style("top", (evento.pageY - 10) + "px")
-                   .style("visibility", "visible")
-                   .html("Distancia al sol: " + d.distance_from_sun + "<br>" +
-                         "Diámetro: " + d.diameter + "<br>" +
-                         "Temperatura media: " + d.mean_temperature + "<br>" +
-                         "Nombre: " + d.planet +"<br>");
-        })
-        .on("mousemove", function(evento, d) {
-            // La posición del tooltip sigue al mouse
-            tooltip.style("left", (evento.pageX + 10) + "px")
-                   .style("top", (evento.pageY - 10) + "px")
-                   .html("Distancia al sol: " + d.distance_from_sun + "<br>" +
-                         "Diámetro: " + d.diameter + "<br>" +
-                         "Temperatura media: " + d.mean_temperature + "<br>" +
-                         "Nombre: " + d.planet +"<br>");
-        })
-        .on("mouseout", function() {
-            // Ocultar tooltip
-            tooltip.style("visibility", "hidden");
-        });
-    
-    // Agregamos el nombre de los planetas
-    planetasG
-        .selectAll('text')
-        .data(data_planetas)
-        .join('text')
-        .attr('x', d => escalaDist(d.distance_from_sun))
-        .attr('y', d => HEIGHT_VIS_1/2 + escalaDiametro(d.diameter)*0.6 + font_size)
-        .attr('font-size', font_size)
-        .attr('font-family', 'monospace')
-        .attr('text-anchor', 'middle')
-        .attr('fill', 'white')
-        .text(d => d.planet);
-
-    // Agregamos el sol
-    planetasG
-        .append('circle')
-        .attr('cx', 0)
-        .attr('cy', HEIGHT_VIS_1/2)
-        .attr('r', sunDiameter/2)
-        .attr('fill', '#ff5100');
-    
-    
-}
-
-
-function crearSatelites(dataset, categoria, filtrar_dataset, ordenar_dataset) {
-    // 1. Actualizo nombre de un H4 para saber qué hacer con el dataset
-
-    // 2. Nos quedamos con los satelites asociados a la categoría seleccionada
-    console.log(categoria)
-    let datos = dataset.filter(d => CATEGORIAS_POR_PLANETA[d.planet] == categoria)
-
-
-
-    // 3. Filtrar, cuando corresponde, por magnitud
-    // Completar aquí
-    console.log(filtrar_dataset)
-    if (filtrar_dataset) {
-        datos = datos.filter(d => d.radius > 100);
-      }
-
-    // 4. Quedarnos con solo 30 satelites. No editar esta línea
-    datos = datos.slice(0, 30);
-    console.log(datos)
-
-    // 5. Ordenar, según corresponda, los 30 satelites. Completar aquí
-    console.log(ordenar_dataset)
-    
-    if (ordenar_dataset == 'alfabético') {
-        datos.sort((a,b) => a.name.localeCompare(b.name)); // Orden alfabetico
-    }
-    if (ordenar_dataset == 'albedo') {
-        datos.sort((a,b) => a.albedo - b.albedo); // Orden menor a mayor albedo
-    }
-
-
-    // 6. Confeccionar la visualización
-
-    // Generamos el 'select' de los planetas
-    // Aplicar estilos a los circle que coinciden con la categoría
-    SVG1
-        .selectAll('circle')
-        .filter(function(d) {
-            return d3.select(this).attr('distancia') === categoria;
-        })
-        .style('stroke', 'white')
-        .style('stroke-width', 7);
-
-    // Remover el borde de los circle de la otra categoría
-    SVG1
-        .selectAll('circle')
-        .filter(function(d) {
-            return d3.select(this).attr('distancia') !== categoria;
-        })
-        .style('stroke', 'none');
-
-    joinDeDatos(datos); // Dibujamos los satélites
-    joinDeDatos(datos); // Hacemos el update
 
     
-
-
-}
-
-function joinDeDatos(datos) {
-    const N_FILMS = 6;
-
-    // Creamos escala diametros
-    let minCabeza = d3.min(datos, d => d.radius);
-    let maxCabeza = d3.max(datos, d => d.radius);
-    
-    let escalaCabeza = d3.scaleLinear([minCabeza, maxCabeza], [(WIDTH_VIS_2/N_FILMS)*0.05, (WIDTH_VIS_2/N_FILMS)*0.12]);
-    
-    // Creamos escala color cabeza
-    let minCabezaMagnitud = d3.min(datos, d => d.magnitude);
-    let maxCabezaMagnitud = d3.max(datos, d => d.magnitude);
-    
-    let escalaColorCabeza = d3.scaleLinear([minCabezaMagnitud, maxCabezaMagnitud], ['white', 'yellow']);
-    
-    // Creamos escala distancia brazos
-    let minAlbedo = d3.min(datos, d => d.albedo);
-    let maxAlbedo = d3.max(datos, d => d.albedo);
-    
-    let escalaBrazos = d3.scaleLinear([minAlbedo, maxAlbedo], [(WIDTH_VIS_2/N_FILMS)*0.17,(WIDTH_VIS_2/N_FILMS)*0.4]);
-    
-    let radio_brazos = (WIDTH_VIS_2/N_FILMS)*0.05
-
-    const PLANETS_COLORS = {
-        'Mercury': '#8B0000', // Rojo
-        'Venus': '#FFD700',   // Dorado
-        'Earth': '#0000FF',   // Azul
-        'Mars': '#FF4500',    // Naranja
-        'Jupiter': '#228B22', // Verde bosque
-        'Saturn': '#DAA520',  // Dorado oscuro
-        'Uranus': '#00CED1',  // Turquesa
-        'Neptune': '#9400D3', // Morado oscuro
-        'Pluto': '#A52A2A'    // Café
-      };
-      
-    const tooltip = d3.select("body").append("div")
-      .attr("class", "tooltipSatelite")
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background", "grey")  
-      .style("border", "1px solid black")  
-      .style("padding", "5px")
-      .style("color", "black");
-
-
-    SVG2.selectAll("g")
-        .data(datos, d => d.name)
-        .join(
-        enter => {
-            const G = enter.append("g");
-
-            // Cuadrilla
-            G.append('rect')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', (WIDTH_VIS_2/N_FILMS))
-            .attr('height', (HEIGHT_VIS_2/N_FILMS))
-            .attr('fill', 'black')
-            .attr('stroke', 'none');
-
-            // Brazos CURVOS *
-            G.append('ellipse')
-            .attr('cx', (WIDTH_VIS_2/N_FILMS)/2)
-            .attr('cy', (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr('rx', d => escalaBrazos(d.albedo))
-            .attr('ry', 15)
-            .attr('fill', 'none')
-            .attr('stroke', d => PLANETS_COLORS[d.planet])
-            .attr('stroke-width', radio_brazos *0.4);
-
-            // Tapamos parte superior
-            G.append('rect')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', (WIDTH_VIS_2/N_FILMS))
-            .attr('height', (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr('fill', 'black');
-
-
-            // Cuerpo
-            G.append('rect')
-            .attr('x', (WIDTH_VIS_2/N_FILMS)/2 - ((WIDTH_VIS_2/N_FILMS)/2 * 0.1)/2)
-            .attr('y', (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr('width', (WIDTH_VIS_2/N_FILMS)/2 * 0.1)
-            .attr('height', (HEIGHT_VIS_2/N_FILMS)/2 * 0.8)
-            .attr('fill',  d => PLANETS_COLORS[d.planet]);
-
-            // Mano derecha
-            G.append("circle")
-            .attr("cx", d => escalaBrazos(d.albedo) + (WIDTH_VIS_2/N_FILMS)/2 )
-            .attr("cy", (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr("fill",  d => PLANETS_COLORS[d.planet])
-            .attr("r",   radio_brazos);
-            // Mano izquierda
-            G.append("circle")
-            .attr("cx", d =>  (WIDTH_VIS_2/N_FILMS)/2 - escalaBrazos(d.albedo))
-            .attr("cy", (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr("fill",  d => PLANETS_COLORS[d.planet])
-            .attr("r",  radio_brazos);
-
-            // -------------------------
-
-            // Cabeza
-            G.append("circle")
-            .attr("cx", (WIDTH_VIS_2/N_FILMS)/2 )
-            .attr("cy", (HEIGHT_VIS_2/N_FILMS)/2)
-            .attr("fill", d => escalaColorCabeza(d.magnitude))
-            .attr("r",  d => escalaCabeza(d.radius));
-
-            // Texto
-            G.append("text")
-            .attr("x", (WIDTH_VIS_2/N_FILMS)/2)
-            .attr("y", (HEIGHT_VIS_2/N_FILMS)/2 * 0.5)
-            .attr("text-anchor", "middle")
-            .attr('font-family', 'monospace')
-            .attr('fill',  d => PLANETS_COLORS[d.planet])
-            .text(d => d.name);
-
-            G.attr("transform", (d, i) => {
-                const x = -(WIDTH_VIS_2/N_FILMS);
-                const y = -(HEIGHT_VIS_2/N_FILMS);
-                return `translate(${x}, ${y})`;
-                })
-          },
-          update => {
-            // update es cada G.
-            update.select("circle")
-              .transition("nueva_posicion")
-              .duration(1000);
-            update.select("text").text(d => d.name);
-
-            update.transition("nueva_posicion")
-                .duration(1000)
-                .attr("transform", (d, i) => {
-                const n = Math.floor(WIDTH_VIS_2 / (WIDTH_VIS_2 / N_FILMS));
-                const x = (i % n) * (WIDTH_VIS_2 / N_FILMS);
-                const y = Math.floor(i / n) * (HEIGHT_VIS_2 / N_FILMS);
-                return `translate(${x}, ${y})`;
-                })
-
-            return update
-          },
-          exit => {
-            exit.transition()
-                .duration(1500)
-                .attr('transform', (d,i) => {
-                    const x =  (WIDTH_VIS_2 / 2);
-                    const y =  (HEIGHT_VIS_2) * 1.4;
-                    return `translate(${x}, ${y})`;
-                })
-                .remove();
-          }
-        )
-
-    
-    SVG2.selectAll('g')
-        .on("mouseover", function(evento, d) {
-            // Mouse sobre satelite, cambiamos opacidad.
-            SVG2.selectAll('g')
-                .filter(function(e) {
-                    return e !== d;
-                })
-                .style('opacity', 0.4); // Bajamos la opacidad de los elementos filtrados
-            
-            // Mostrar tooltip
-            tooltip.style("left", (evento.pageX + 10) + "px")
-                .style("top", (evento.pageY - 10) + "px")
-                .style("visibility", "visible")
-                .html("Nombre: " + d.name + "<br>" +
-                        "Planeta: " + d.planet + "<br>" +
-                        "Magnitud: " + d.magnitude + "<br>" +
-                        "Albedo: " + d.albedo +"<br>" +
-                        "Radio: " + d.radius +"<br>");
-        })
-        .on("mousemove", function(evento, d) {
-            // La posición del tooltip sigue al mouse
-            tooltip.style("left", (evento.pageX + 10) + "px")
-                .style("top", (evento.pageY - 10) + "px")
-                .html("Nombre: " + d.name + "<br>" +
-                        "Planeta: " + d.planet + "<br>" +
-                        "Magnitud: " + d.magnitude + "<br>" +
-                        "Albedo: " + d.albedo +"<br>" +
-                        "Radio: " + d.radius +"<br>");
-        })
-        .on("mouseout", function() {
-            // Restauramos la opacidad de todos los elementos del g
-            SVG2.selectAll('g')
-                .style("opacity", 1);
-            tooltip.style("visibility", "hidden");
-        });
-    
-    
-    
-}
 
 
