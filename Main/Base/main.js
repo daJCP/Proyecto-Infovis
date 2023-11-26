@@ -1,5 +1,8 @@
 const SVG1= d3.select("#vis-1").append("svg"); // MultiLineChart
 const SVG2 = d3.select("#vis-2").append("svg"); // Circular Packing
+const SVG_Selector = d3.select("#vis-selector").append("svg"); // Selector
+
+const PL_Logo = 'https://www.premierleague.com/resources/rebrand/v7.133.4/i/elements/pl-main-logo.png'
 
 const EV_PL = 'data\data_Procesada\proyecto_data_ev_table_premier_league_2022_2023.csv';
 const FIFA = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/proyecto_data_fifa_23.csv';
@@ -26,14 +29,12 @@ const premier_league_teams = {'Arsenal': '#ef0107',
 'West Ham United': '#7a263a',
 'Wolverhampton Wanderers': '#fdb913'};
   
+// <>>>>>><<<<<<<>>>>< Visualización 1 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
 // Tamaños
-const scala = 1;
-const WIDTH_VIS_1 = 1200*scala;
+const scala = 0.8;
+const WIDTH_VIS_1 = 1500*scala;
 const HEIGHT_VIS_1 = 900*scala;
-
-const WIDTH_VIS_2 = 800;
-const HEIGHT_VIS_2 = 800;
 
 const MARGIN = {
     top: 0,
@@ -43,7 +44,6 @@ const MARGIN = {
   };
 
 SVG1.attr("width", WIDTH_VIS_1).attr("height", HEIGHT_VIS_1);
-SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
 
 const container2 = SVG1.append("g").attr(
     "transform",
@@ -82,6 +82,7 @@ function loadingData() {
 
         
             createMultilineChart(data_ev, data_fifa);
+            createSelector(data_ev, data_fifa);
         })
     })
 }
@@ -99,7 +100,7 @@ function createMultilineChart(data, data_fifa) {
     equipo.puntuaciones.map((puntuacion, index) => ({
         equipo,
         puntuacion,
-        index: index + 1,
+        index: index ,
     }))
     );
 
@@ -124,12 +125,128 @@ function createMultilineChart(data, data_fifa) {
 
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const escalaX = d3.scaleLinear([0, n], [0, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
+    const escalaX = d3.scaleLinear([0, n-1], [0, WIDTH_VIS_1 - MARGIN.left - MARGIN.right]);
     const escalaY = d3.scaleLinear([1, n_teams + 1], [0, HEIGHT_VIS_1 - 2 * MARGIN.bottom]);
 
     // Creamos ejes
-    const ejeX = d3.axisBottom(escalaX).ticks(n).tickFormat(d => d < 39 ? d : '');
+    const ejeX = d3.axisBottom(escalaX).ticks(n);
     const ejeY = d3.axisLeft(escalaY).ticks(n_teams).tickFormat(d => d < 21 ? d : '');
+
+    // Secciones de clasificaciones
+
+    // Sección Champions League
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.bottom - (escalaY(2) - escalaY(1))/2 )
+        .attr("width", escalaX(n+2) - escalaX(0) * 3)
+        .attr("height", (escalaY(2) - escalaY(1))* 4) 
+        .attr("fill", "#4dffff")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.bottom - (escalaY(2) - escalaY(1))/2 )
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1))* 4) 
+        .attr("fill", "#4dffff")
+        .attr('opacity', 0.3); 
+
+
+    // Sección Europa League
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(4.5)) 
+        .attr("width", escalaX(n+2) - escalaX(0))
+        .attr("height", (escalaY(2) - escalaY(1)) * 2) 
+        .attr("fill", "#FAD660")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(4.5)) 
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1)) * 2) 
+        .attr("fill", "#FAD660")
+        .attr('opacity', 0.3);
+    
+    // // Sección WestHam United
+
+    // SVG1.append("rect")
+    //     .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+    //     .attr("y", MARGIN.top + MARGIN.left + escalaY(13.5)) 
+    //     .attr("width", escalaX(n+2) - escalaX(0))
+    //     .attr("height", (escalaY(2) - escalaY(1))) 
+    //     .attr("fill", "green")
+    //     .attr('opacity', 0.3); 
+    // SVG1.append("rect")
+    //     .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+    //     .attr("y", MARGIN.top + MARGIN.left + escalaY(13.5)) 
+    //     .attr("width", 10)
+    //     .attr("height", (escalaY(2) - escalaY(1))) 
+    //     .attr("fill", "green")
+    //     .attr('opacity', 0.3);
+    
+    // Sección Europa Conference League
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(6.5)) 
+        .attr("width", escalaX(n+2) - escalaX(0))
+        .attr("height", (escalaY(2) - escalaY(1))) 
+        .attr("fill", "green")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(6.5)) 
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1))) 
+        .attr("fill", "green")
+        .attr('opacity', 0.3); 
+
+    
+    // Sección Nada
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(7.5)) 
+        .attr("width", escalaX(n+2) - escalaX(0))
+        .attr("height", (escalaY(2) - escalaY(1)) * 7) 
+        .attr("fill", "white")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(7.5)) 
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1))*7) 
+        .attr("fill", "white")
+        .attr('opacity', 0.3); 
+
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(14.5)) 
+        .attr("width", escalaX(n+2) - escalaX(0))
+        .attr("height", (escalaY(2) - escalaY(1)) * 3) 
+        .attr("fill", "white")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(14.5)) 
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1))*3) 
+        .attr("fill", "white")
+        .attr('opacity', 0.3); 
+
+    // Sección Relegation
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(17.5)) 
+        .attr("width", escalaX(n+2) - escalaX(0))
+        .attr("height", (escalaY(2) - escalaY(1)) * 3) 
+        .attr("fill", "red")
+        .attr('opacity', 0.3); 
+    SVG1.append("rect")
+        .attr("x", WIDTH_VIS_1 - escalaX(0) - MARGIN.right) 
+        .attr("y", MARGIN.top + MARGIN.left + escalaY(17.5)) 
+        .attr("width", 10)
+        .attr("height", (escalaY(2) - escalaY(1))*3) 
+        .attr("fill", "red")
+        .attr('opacity', 0.3); 
 
     // Agregamos ejes
     SVG1.append('g')
@@ -171,7 +288,7 @@ function createMultilineChart(data, data_fifa) {
 
     // Creamos lineas y puntos
     let lines = d3.line()
-        .x(d => escalaX(d.index)) 
+        .x(d => escalaX(d.index )) 
         .y(d => escalaY(d.puntuacion));
 
 
@@ -192,7 +309,7 @@ function createMultilineChart(data, data_fifa) {
         .join("circle")
         .attr("r", 5)
         .attr("fill",  (d) => premier_league_teams[d.equipo.equipo])
-        .attr("cx", (d) => escalaX(d.index))
+        .attr("cx", (d) => escalaX(d.index ))
         .attr("cy", (d) => escalaY(d.puntuacion));
     
     
@@ -202,40 +319,38 @@ function createMultilineChart(data, data_fifa) {
         .data(extraPoints)
         .join("image")
         .attr("class", "extra")
-        .attr("width", 40)  
-        .attr("height", 40) 
+        .attr("width", escalaY(2) - escalaY(1))  
+        .attr("height", escalaY(2) - escalaY(1)) 
         .attr("href", d => data_fifa.filter(a => a.club === d.equipo.equipo)[0].club_logo) 
         .attr("x", d => escalaX(d.index) + MARGIN.left - 20) 
-        .attr("y", d => escalaY(d.puntuacion) + MARGIN.top + MARGIN.bottom - 20); 
+        .attr("y", d => escalaY(d.puntuacion) + MARGIN.top + MARGIN.bottom - (escalaY(2) - escalaY(1))/2); 
+      
     
-    
-    // Definir el clipPath
+    // ClipPath
     let clip = SVG1.append("defs")
         .append("clipPath")
         .attr("id", "clip")
         .append("rect")
-        .attr("width", WIDTH_VIS_1 - MARGIN.left - MARGIN.right+15) 
-        .attr("height", HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom + 100)
-        .attr("x", 0)
+        .attr("width", WIDTH_VIS_1 - MARGIN.left - MARGIN.right + 20) 
+        .attr("height", HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom )
+        .attr("x", MARGIN.left - MARGIN.right + 5  )
         .attr("y", MARGIN.top-10);
 
-    // Aplicar el clipPath a los elementos que no deben superponerse sobre los ejes
+    // ClipPath a los elementos que no deben superponerse sobre los ejes
     container2.attr("clip-path", "url(#clip)");
 
     // Efecto de zoom
     const zoom = d3.zoom()
-        .scaleExtent([1, 20])  // Limites de zoom, 1 = sin zoom, 10 = máximo zoom
+        .scaleExtent([1, 39])
         .translateExtent([
-            [0, 0], 
-            [WIDTH_VIS_1 - MARGIN.left - MARGIN.right+100, HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom]
+            [0,0 ], 
+            [WIDTH_VIS_1- MARGIN.left - MARGIN.right +95, HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom]
         ])
         .on("zoom", zoomed);
 
-    // Aplicar la función de zoom al SVG o un grupo dentro del SVG
     SVG1.call(zoom);
 
-    const formatTicks = d => Math.floor(d) === d ? d : "";
-
+    const formatTicks = d => Math.ceil(d) === d ? d : "";
     // Función que se llama cuando se hace zoom
     function zoomed(event) {
         // Escala el eje X
@@ -245,48 +360,212 @@ function createMultilineChart(data, data_fifa) {
         SVG1.select(".x-axis")
             .call(d3.axisBottom(newXScale)
             .tickValues(d3.range(0, n, 1).filter(d => newXScale(d) >= 0 && newXScale(d) <= WIDTH_VIS_1)) // Asegura que los ticks sean de a 1
-            .tickFormat(formatTicks));
-
-        // Actualiza la cuadrícula (si la estás utilizando)
-        SVG1.selectAll(".grid-line") // Asegúrate de que esté utilizando una clase apropiada para seleccionarlas
-            .attr("x1", d => newXScale(d))
-            .attr("x2", d => newXScale(d));
-            const maxXVisible = newXScale.invert(WIDTH_VIS_1 - MARGIN.left - MARGIN.right);
+            .tickFormat(formatTicks))
+            .selectAll("line")
+            .attr("y1", -(HEIGHT_VIS_1 - MARGIN.bottom - MARGIN.top - MARGIN.bottom))
+            .attr("stroke-dasharray", "5")
+            .attr("opacity", 0.4);
 
         SVG1.selectAll("image.extra")
-        .transition()
-        .duration(500)
-        .attrTween("y", function(d) {
-            const lastVisiblePoint = flattenedData.filter(p => p.equipo.equipo === d.equipo.equipo && newXScale(p.index) <= WIDTH_VIS_1 - MARGIN.right).pop();
-            const yStart = d3.select(this).attr("y");
-            let yEnd;
+            .transition()
+            .duration(500)
+            .attrTween("y", function(d) {
+                const lastVisiblePoint = flattenedData.filter(p => p.equipo.equipo === d.equipo.equipo && newXScale(p.index) <= WIDTH_VIS_1 - MARGIN.right).pop();
+                const yStart = d3.select(this).attr("y");
+                let yEnd;
+            
+                if (lastVisiblePoint) {
+                    yEnd = escalaY(lastVisiblePoint.puntuacion) + MARGIN.top + MARGIN.bottom - (escalaY(2) - escalaY(1))/2;
+                } else {
+                    yEnd = yStart;
+                }
+            
+                return  d3.interpolateNumber(yStart, yEnd);
         
-            if (lastVisiblePoint) {
-                yEnd = escalaY(lastVisiblePoint.puntuacion) + MARGIN.top + MARGIN.bottom - 20;
-            } else {
-                yEnd = yStart;
-            }
-        
-            return d3.interpolateNumber(yStart, yEnd);
-        });
+            });
 
 
         // Actualiza las líneas y puntos para que coincidan con la nueva escala
         lines.x(d => newXScale(d.index));
         container2.selectAll('path').attr('d', ([d, val]) => lines(val));
-        container2.selectAll("circle").attr("cx", (d) => newXScale(d.index));
-   
+        container2.selectAll("circle").attr("cx", (d) => newXScale(d.index ));
 
-
-        
-        
-}
-    
-       
-    
+    }
 }
 
 
+// <>>>>>><<<<<<<>>>>< Visualización 2 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
+
+// Tamaños
+const scala_2 = 0.8;
+
+const WIDTH_VIS_2 = 800;
+const HEIGHT_VIS_2 = 1000;
+
+const WIDTH_VIS_Selector = 1200;
+const HEIGHT_VIS_Selector = 100;
+
+const MARGIN_1 = {
+    top: 0,
+    bottom: 45,
+    left: 45,
+    right: 48,
+  };
+
+SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
+SVG_Selector.attr("width", WIDTH_VIS_Selector).attr("height", HEIGHT_VIS_Selector);
+
+const container1 = SVG1.append("g").attr(
+    "transform",
+    `translate(${MARGIN.left} ${MARGIN.top + MARGIN.bottom})`
+  );
+
+function createSelector(data, data_fifa) {
+    
+    const n =  data.length;
+    const extraPoints = data.map(equipo => ({
+        equipo,
+        puntuacion: equipo.puntuaciones[ n - 1],
+        index: n
+    }));
+
+    // Añadimos un cuadrado de background al SVG_Selector
+
+    // Añadir este rec con estilo css
+    SVG_Selector.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', WIDTH_VIS_Selector)
+        .attr('height', HEIGHT_VIS_Selector)
+        .style('fill', '#1a1a1a') 
+        .style('stroke', 'gray')
+        .style('stroke-width', '7px') 
+        .attr('rx', 29) 
+        .attr('ry', 29); 
+
+    // Creamos escala para dividir el cuadro en los n equipos
+    let escalaEquipos = d3.scaleLinear([0, n + 1], [WIDTH_VIS_Selector/n, WIDTH_VIS_Selector]);
+
+    // Creamos un circulo de radio 5 y color rojo por cada equipo en el cuadro
+
+    // lista con n +1 elementos
+    // let lista = Array.from(Array(n+1).keys());
+
+    // SVG_Selector.selectAll('circle')
+    //     .data(lista)
+    //     .join('circle')
+    //     .attr('r', 5)
+    //     .attr('cx', (d, i) => escalaEquipos(i))
+    //     .attr('cy', HEIGHT_VIS_Selector/2)
+    //     .attr('fill', 'red');
+
+    // Necesito que
+    // Logo clubes 
+    const img_scale = 1;
+
+    SVG_Selector.selectAll("image")
+        .data(extraPoints)
+        .join("image")
+        .attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+        .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+        .attr("href", d => data_fifa.filter(a => a.club === d.equipo.equipo)[0].club_logo)
+        .attr("x", (d, i) => escalaEquipos(i+1) - ((escalaEquipos(2) - escalaEquipos(1))/2)*img_scale)
+        .attr("y", (escalaEquipos(2) - escalaEquipos(1))/2 * img_scale);
+        
+    // SVG_Selector.selectAll("image")
+    //     .attr('transform', `translate(0, ${-((escalaEquipos(2) - escalaEquipos(1)) * img_scale * 0.1)})`);
+    
+    SVG_Selector.append("image")
+        .attr('class', 'premier_league')
+        .attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+        .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+        .attr("href", PL_Logo)
+        .attr("x",  ((escalaEquipos(2) - escalaEquipos(1)))*0.5*img_scale)
+        .attr("y", (escalaEquipos(2) - escalaEquipos(1))/2 * img_scale);
+
+    function highlightTeam(selectedTeam) {
+        // Reduce la opacidad de todos los equipos
+        console.log(selectedTeam);
+
+        // container2 seleccionar todos los path y circle con 0.1 de opacidad
+
+        container2.selectAll('path')
+            .attr('opacity', 0.1);
+        container2.selectAll('circle')
+            .attr('opacity', 0.1);
+    
+        // Aumenta la opacidad del equipo seleccionado
+        container2.selectAll('path')
+            .filter(d => d[0].equipo === selectedTeam)
+            .attr('opacity', 1);
+        container2.selectAll('circle')
+            .filter(d => d.equipo.equipo === selectedTeam)
+            .attr('opacity', 1);
+
+        SVG1.selectAll("image.extra")
+            .attr('opacity', 0.25);
+        SVG1.selectAll("image.extra")
+            .filter(d => d.equipo.equipo === selectedTeam)
+            .attr('opacity', 1);
+        
+    }
+
+    function resetVisualization() {
+        container2.selectAll('path')
+            .attr('opacity', 1);
+        container2.selectAll('circle')
+            .attr('opacity', 1);
+        SVG1.selectAll("image.extra")
+            .attr('opacity', 1);
+    }
+
+    // Selector de equipo
+    SVG_Selector.selectAll("image:not(.premier_league)")
+    .on('click', (evento, d) => {
+        let texto = `Datos ${d.equipo.equipo} `;
+        d3.selectAll("#selected").text(texto);
+        highlightTeam(d.equipo.equipo);
+    });
+
+    SVG_Selector.selectAll("image.premier_league")
+        .on('click', () => {
+            let texto = `Dato Premier League`;
+            d3.selectAll("#selected").text(texto);
+            resetVisualization();
+        });
+    
+    const movimiento = -((escalaEquipos(2) - escalaEquipos(1)) * img_scale * 0.5);
+
+    // Hacer más ancha la image al poner mouse encima
+    SVG_Selector.selectAll("image:not(.premier_league)")
+        .on("mouseover", function() {
+            d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5)
+            .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5);
+            d3.select(this).raise();
+            // Translate hacia arriba
+            d3.select(this).attr('transform', `translate(-10,-20)`);
+        })
+        .on("mouseout", function() {
+            d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+            .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale);
+            d3.select(this).attr('transform', `translate(0,-20)`);
+            d3.select(this).transition().duration(1000*0.1).attr('transform', `translate(0,0)`);
+        });
+    
+    SVG_Selector.selectAll("image.premier_league")
+        .on("mouseover", function() {
+            d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5)
+            .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale * 1.5);
+            d3.select(this).raise();
+        })
+        .on("mouseout", function() {
+            d3.select(this).attr("width", (escalaEquipos(2) - escalaEquipos(1)) * img_scale)
+            .attr("height", (escalaEquipos(2) - escalaEquipos(1)) * img_scale);
+        });
+
+    
+        
+}
 
 
 
@@ -300,20 +579,8 @@ function createMultilineChart(data, data_fifa) {
 
 
 
+// <>>>>>><<<<<<<>>>>< Visualización 3 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
-
-
-
-
-
-
-
-
-
-
-
-
-// crearSistemaSolar();
 
 function crearSistemaSolar() {
     /* 
@@ -463,8 +730,6 @@ function plot_planetas(data_planetas) {
 
 function crearSatelites(dataset, categoria, filtrar_dataset, ordenar_dataset) {
     // 1. Actualizo nombre de un H4 para saber qué hacer con el dataset
-    let texto = `Categoria: ${categoria} - Filtrar: ${filtrar_dataset} - Orden: ${ordenar_dataset}`
-    d3.selectAll("#selected").text(texto)
 
     // 2. Nos quedamos con los satelites asociados a la categoría seleccionada
     console.log(categoria)
