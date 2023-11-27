@@ -927,6 +927,7 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
         .on("click", function(event, d) {
             if (d.depth === 1) { // Verifica si es un círculo de equipo
                 createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, dataHierarchy, selected, data_filtrada,1,d.data.name); // Llama a crearStats con los datos del equipo
+            
             }
         });
 
@@ -961,22 +962,75 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
         return;
     }
 
-    // get el objeto de data_pl_2023_stats que tenga el mismo club que selected_team
-    let data_pl_2023_stats_selected = data_pl_2023_stats.filter(d => console.log(d.squad) === selected_team);
+    let cuadradoCentroX = WIDTH_VIS_2/2 + MARGIN_3.left + (WIDTH_VIS_2/2 - MARGIN_3.left*3) / 2;
+    let cuadradoCentroY = MARGIN_3.top*2 + (HEIGHT_VIS_2 - MARGIN_3.bottom*2 - MARGIN_3.top*2) / 2;
 
-    console.log(data_pl_2023_stats_selected, selected_team ,'data_pl_2023_stats_selected');
+
+    // get el objeto de data_pl_2023_stats que tenga el mismo club que selected_team
+    let teamData = data_pl_2023_stats.filter(d => d.squad.trimStart().split(' ')[0] ===selected_team.trimStart().split(' ')[0])[0];
+
+    // console.log(data_pl_2023_stats_selected, selected_team ,'data_pl_2023_stats_selected');
 
     // Grafico Spider Chart sobre w, d, l, gf, ga, gd, xg, xga, xgd, xgd_90, pts.
     let metrics = ['w', 'd', 'l', 'gf', 'ga', 'gd', 'xg', 'xga', 'xgd', 'xgd_90', 'pts'];
-    
-    
 
+    console.log(teamData, 'data_pl_2023_stats_selected');
 
+    // Calcula los totales y porcentajes
+    let totalGames = teamData.w + teamData.d + teamData.l;
+    let pieData = [
+        {name: 'Win', value: teamData.w / totalGames},
+        {name: 'Draw', value: teamData.d / totalGames},
+        {name: 'Lose', value: teamData.l / totalGames}
+    ];
 
+    // Configura el gráfico de torta
+    let radius = 100; // Ajusta según tus necesidades
+    let arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
+    let pie = d3.pie().sort(null).value(d => d.value);
 
+    // Dibuja el gráfico de torta
+    // Selecciona o crea el grupo para el gráfico de torta
+    let g = SVG2.selectAll(".pieChartGroup").data([pieData]);
 
+    // Enter para nuevos elementos
+    let gEnter = g.enter().append("g")
+        .attr("class", "pieChartGroup")
+        .attr("transform", "translate(" + cuadradoCentroX + "," + cuadradoCentroY + ")");
+
+    // Merge para elementos existentes
+    g = gEnter.merge(g);
+
+    // Trabaja con los arcos
+    let arcs = g.selectAll(".arc")
+        .data(d => pie(d), d => d.data.name);
+
+    // Enter para nuevos arcos
+    arcs.enter().append("path")
+        .attr("class", "arc")
+        .style("fill", d => {
+            switch(d.data.name) {
+                case 'Win': return "green";
+                case 'Draw': return "yellow";
+                case 'Lose': return "red";
+            }
+        })
+        .each(function(d) { this._current = d; }); // guarda el estado inicial para la transición
+
+    // Update para arcos existentes
+    arcs.transition().duration(1000)
+        .attrTween("d", function(d) {
+            let interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return t => arc(interpolate(t));
+        });
+
+    // Remove para arcos que ya no son necesarios
+    arcs.exit().remove();
 
         
+
+
 }
     
 
