@@ -4,6 +4,7 @@ const SVG_Selector = d3.select("#vis-selector").append("svg"); // Selector
 
 const PL_Logo = 'https://www.premierleague.com/resources/rebrand/v7.133.4/i/elements/pl-main-logo.png'
 
+// const PL_2023 = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/premier_2022_2023.csv'
 const PL_2023_Players = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/premier_2022_2023_players.csv'
 const PL_2023_STATS = 'https://raw.githubusercontent.com/daJCP/Proyecto-Infovis/main/data/data_Procesada/premier_2022_2023.csv'
 const EV_PL = 'data\data_Procesada\proyecto_data_ev_table_premier_league_2022_2023.csv';
@@ -53,6 +54,15 @@ const container2 = SVG1.append("g").attr(
     "transform",
     `translate(${MARGIN.left} ${MARGIN.top + MARGIN.bottom})`
   );
+
+function extraerFotoNacionalidad(nombre, data_fifa) {
+    let pais = nombre.split(' ')[0];
+
+    // Get a sample of someone from pais in data_fifa
+    let jugador = data_fifa.find(jugador => jugador.nationality === pais);
+
+    return jugador ? jugador.photo : undefined;
+}
 
 function extraerYLimpiarApellido(nombre) {
     let nombreSinNumeros = nombre.replace(/[0-9]/g, '');
@@ -181,6 +191,9 @@ function loadingData() {
                     // );
 
 
+                    // Metodo Ilegal pero rapido
+                    
+
                     let data_filtrada = data_fifa.filter(fifa_player => 
                         data_pl_2023_players.some(seleccionado =>
                             esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
@@ -215,6 +228,8 @@ function createMultilineChart(data, data_fifa) {
         index: index ,
     }))
     );
+
+    // console.log(extraerFotoNacionalidad('br', data_fifa));
 
     const equipos = d3.group(flattenedData, d => d.equipo);
 
@@ -674,6 +689,13 @@ const MARGIN_2 = {
     right: 10,
   };
 
+const MARGIN_3 = {
+    top: 60,
+    bottom: 10,
+    left: 10,
+    right: 60,
+};
+
 const scala_2 = 0.8;
 
 const WIDTH_VIS_2 = 1250;
@@ -714,14 +736,17 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
 
     // Cuadrilla izquierda
     SVG2.append('rect')
-        .attr("x", MARGIN_2.left*2)
-        .attr("y", MARGIN_2.top*2)
-        .attr("width", semiWidth - MARGIN_2.left*4)
-        .attr("height", HEIGHT_VIS_2-MARGIN_2.bottom*2 - MARGIN_2.top*2)
+        .attr("x", MARGIN_3.left*2)
+        .attr("y", MARGIN_3.top*2)
+        .attr("width", semiWidth - MARGIN_3.left*4)
+        .attr("height", HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)
         .style("stroke", "purple");
     
+    // Cuadrilla derecha
+    createStatsRight(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    
     let pack = d3.pack()
-        .size([semiWidth - MARGIN_2.left*4, HEIGHT_VIS_2-MARGIN_2.bottom*2 - MARGIN_2.top*2])
+        .size([semiWidth - MARGIN_3.left*4, HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2])
         .padding(2); 
 
     // data_pl_2023_players extrae los que tengan de nombre de equipo en selected
@@ -737,15 +762,27 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
     }
 
     // Obtenemos la data de fifa filtrada por jugadores
-    if (selected.size === 0) {
+    if (selected.size < 0) {
         data_filtrada = data_fifa;
     }
     else{
-        data_filtrada = data_fifa.filter(fifa_player => 
+        data_filtrada = data_fifa
+            .filter(fifa_player =>
                 data_pl_2023_players_selected.some(seleccionado =>
-                    esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
+                esMismaPersona(fifa_player.name, seleccionado.player) && revisamosEdad(fifa_player.age, seleccionado.age)
                 )
-            );
+            )
+            .map(fifa_player => {
+                // Encontrar el objeto seleccionado correspondiente
+                let seleccionado = data_pl_2023_players_selected.find(selec =>
+                esMismaPersona(fifa_player.name, selec.player) && revisamosEdad(fifa_player.age, selec.age)
+                );
+                // Retornar una copia del jugador con el club actualizado
+                return {
+                ...fifa_player,
+                club: seleccionado ? seleccionado.club : fifa_player.club
+                };
+            });
     }
 
     // let data_filtrada = data_fifa.filter(fifa_player => 
@@ -754,7 +791,7 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
     //     )
     // );
 
-    // console.log(data_filtrada, 'data_filtrada');
+    console.log(data_filtrada, 'data_filtrada');
 
 
     // Generar data jerarquizada para el pack layout
@@ -762,28 +799,59 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
         name: "equipos",
         children: Array.from(
           // Agrupar por equipo
-          d3.group(data_pl_2023_players_selected, d => d.club), 
+          d3.group(data_filtrada, d => d.club), 
           ([name, players]) => ({
             name,
             children: Array.from(
               // Agrupar por nacionalidad dentro de cada equipo
-              d3.group(players, d => d.nation),
+              d3.group(players, d => d.nationality),
               ([name, players]) => ({
                 name,
+                players: players,
+                flag: players[0].flag,
                 value: players.length // El tamaño del círculo será proporcional al número de jugadores
               })
             )
           })
         )
       };
+
     
     console.log(dataHierarchy, 'dataHierarchy');
-
 
     // Seteamos el root
     var root = d3.hierarchy(dataHierarchy)
       .sum(d => d.value);
     pack(root);
+
+    SVG2.selectAll("patterns")
+      .data(root.descendants().filter(d => d.depth === 2)) // Filtrar por nodos de nacionalidad
+      .enter()
+      .append("pattern")
+      .attr("id", d => "flag-pattern-" + d.data.name.replace(/\s+/g, '-')) // Asignar un ID único a cada patrón
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("patternContentUnits", "objectBoundingBox")
+      .append("image")
+      .attr("xlink:href", d => d.data.flag) // La bandera de cada país
+      .attr("width", 1)
+      .attr("height", 1)
+      .attr("preserveAspectRatio", "xMidYMid slice");
+
+    
+    let premierLeagueLogoUrl = "url_to_the_premier_league_logo.png"; // Reemplaza con tu variable
+
+      // Crear un patrón para el logo de la Premier League
+    SVG2.append("pattern")
+        .attr("id", "premier-league-logo")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("patternContentUnits", "objectBoundingBox")
+        .append("image")
+        .attr("xlink:href", PL_Logo)
+        .attr("width", 1)
+        .attr("height", 1)
+        .attr("preserveAspectRatio", "xMidYMid slice");
 
     // Creamos un grupo para cada nodo
     let node = SVG2.selectAll(".node")
@@ -799,33 +867,117 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
     // Actualizamos todos los nodos existentes y nuevos
     node = nodeEnter.merge(node);
     
-    node.attr("transform", d => `translate(${d.x + MARGIN_2.left*2}, ${d.y + MARGIN_2.top*2})`);
+    node.attr("transform", d => `translate(${d.x + MARGIN_3.left*2}, ${d.y + MARGIN_3.top*2})`);
     
     node.append("circle")
         .attr("r", d => d.r)
         .style("fill", d => d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "black")
         .style("stroke", "purple");
     
-    // Añadir texto
-    // node.append("text")
-    //     .attr("dy", ".3em")
-    //     .style("text-anchor", "middle")
-    //     .text(d => d.depth === 2 ? d.data.name : '')  // Solo mostrar texto en nodos hoja
-    //     .style("font-size", d => Math.max(10, d.r / 5)) // Ajusta el tamaño del texto en función del radio del círculo, con un mínimo
-    //     .style("fill", "white");    
+    node.selectAll("circle")
+        .style("fill", d => {
+            if (d.depth === 2) { // Si el nodo representa una nacionalidad
+                return `url(#flag-pattern-${d.data.name.replace(/\s+/g, '-')})`; // Usa el patrón de bandera
+            }
+            return d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "#3d195b"; // Usa un color sólido para otros nodos
+        })
+        .style("stroke", "purple");
+    
+    // Suponiendo que 'node' es la selección de tus nodos circulares
+    node.selectAll("circle")
+        .on("mouseover", function(event, d) {
+            // Inicializamos el contenido del tooltip
+            let content = "";
+            let texto = '';
+            // Verificar la profundidad del nodo y actualizar el contenido del tooltip
+            if (d.depth === 0) { // La raíz de la jerarquía
+                // console.log(d.data.children, 'd');
+                content = `Datos: ${Array.from(d.data.children)
+                    .map(team=> `${team.name}`)
+                    .join(' - ')}`;
+
+            } else if (d.depth === 1) { // Un equipo específico
+                
+                content = `${d.data.name}`;
+                //  console.log(d, 'd.data.name');
+            } else if (d.depth === 2) { // Una nacionalidad específica dentro de un equipo
+                texto = `${Array.from(d.data.players)
+                    .map(player=> `${player.name}`)
+                    .join(', ')}`;
+                content = `Nacionalidad: ${d.data.name}<br>Jugadores: ${d.value}<br> ${texto}` ;
+            }
+
+            // Mostrar el tooltip con el contenido actualizado
+            d3.select("#tooltip")
+                .style("visibility", "visible")
+                .html(content);
+        })
+        .on("mousemove", function(event, d) {
+            // Mover el tooltip con el cursor
+            d3.select("#tooltip")
+            .style("top", (event.pageY - 10) + "px")
+            .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", function() {
+            // Ocultar el tooltip
+            d3.select("#tooltip").style("visibility", "hidden")
+        });
+    
+    node.selectAll("circle")
+        .on("click", function(event, d) {
+            if (d.depth === 1) { // Verifica si es un círculo de equipo
+                createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, dataHierarchy, selected, data_filtrada,1,d.data.name); // Llama a crearStats con los datos del equipo
+            }
+        });
+
+    
+    // Añadimos un titulo sobre el cuadrado izquierdo
+
+    SVG2.append("text")
+        .attr("x", MARGIN_3.right)
+        .attr("y", MARGIN_3.top + MARGIN_2.top * 2)
+        .attr("text-anchor", "left")
+        .attr("font-size", "30px")
+        .attr("fill", "white")
+        .text("Jugadores por Equipo y Nacionalidad");
+
+
+
 }
-
-
-
-
-
-
-
-
 // <>>>>>><<<<<<<>>>>< Visualización 3 ><---------------------------------------------------------------><>>>>>><<<<<<<>>>><
 
 
+function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, dataHierarchy, selected, data_filtrada, inicio, selected_team){
 
+    // Añadimos un cuadrado a la derecha
+    if (inicio === 0) {
+        SVG2.append('rect')
+            .attr("x", WIDTH_VIS_2/2 + MARGIN_3.left)
+            .attr("y", MARGIN_3.top*2)
+            .attr("width", WIDTH_VIS_2/2 - MARGIN_3.left*3)
+            .attr("height", HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)
+            .style("stroke", "purple");
+        
+        return;
+    }
+
+    // get el objeto de data_pl_2023_stats que tenga el mismo club que selected_team
+    let data_pl_2023_stats_selected = data_pl_2023_stats.filter(d => console.log(d.squad) === selected_team);
+
+    console.log(data_pl_2023_stats_selected, selected_team ,'data_pl_2023_stats_selected');
+
+    // Grafico Spider Chart sobre w, d, l, gf, ga, gd, xg, xga, xgd, xgd_90, pts.
+    let metrics = ['w', 'd', 'l', 'gf', 'ga', 'gd', 'xg', 'xga', 'xgd', 'xgd_90', 'pts'];
+    
+    
+
+
+
+
+
+
+        
+}
     
 
 
