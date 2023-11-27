@@ -535,6 +535,7 @@ function createSelector(data, data_fifa, data_pl_2023_players, data_pl_2023_stat
     const selected = new Set();
 
     createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, selected);
+    
 
     
     const n =  data.length;
@@ -741,9 +742,9 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
         .attr("width", semiWidth - MARGIN_3.left*4)
         .attr("height", HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)
         .style("stroke", "purple");
-    
+
     // Cuadrilla derecha
-    createStatsRight(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    createStatsRight(0,0,0,0,0,0,0,0,0)
     
     let pack = d3.pack()
         .size([semiWidth - MARGIN_3.left*4, HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2])
@@ -838,8 +839,6 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
       .attr("height", 1)
       .attr("preserveAspectRatio", "xMidYMid slice");
 
-    
-    let premierLeagueLogoUrl = "url_to_the_premier_league_logo.png"; // Reemplaza con tu variable
 
       // Crear un patrón para el logo de la Premier League
     SVG2.append("pattern")
@@ -855,24 +854,30 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
 
     // Creamos un grupo para cada nodo
     let node = SVG2.selectAll(".node")
-        .data(root.descendants());
+        .data(root.descendants(), d => d.data.name);
     
     // Eliminamos los nodos que ya no son necesarios
-    node.exit().remove();
+    node.exit()
+        .transition()
+        .duration(200)
+        .attr("transform", "translate(0,0)") // Mover a una posición inicial o fuera de vista
+        .attr("opacity", 0) // O simplemente ocultarlos
+        .end(); // Importante para esperar a que la transición termine
     
     // Se crea nuevos nodos para nuevos datos
     let nodeEnter = node.enter().append("g")
-        .attr("class", "node");
+        .attr("class", "node")
+        .attr("opacity", 0); 
+    
+    nodeEnter.append("circle")
+        .attr("r", d => d.r)
+        .style("fill", d => d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "black")
+        .style("stroke", "purple");
     
     // Actualizamos todos los nodos existentes y nuevos
     node = nodeEnter.merge(node);
     
     node.attr("transform", d => `translate(${d.x + MARGIN_3.left*2}, ${d.y + MARGIN_3.top*2})`);
-    
-    node.append("circle")
-        .attr("r", d => d.r)
-        .style("fill", d => d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "black")
-        .style("stroke", "purple");
     
     node.selectAll("circle")
         .style("fill", d => {
@@ -882,7 +887,14 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
             return d.depth === 1 ? premier_league_teams[d.data.name] || "black" : "#3d195b"; // Usa un color sólido para otros nodos
         })
         .style("stroke", "purple");
-    
+
+    node.transition()
+        .duration(600)
+        .attr("transform", d => `translate(${d.x + MARGIN_3.left*2}, ${d.y + MARGIN_3.top*2})`)
+        .attr("opacity", 1)
+        .select("circle")
+        .attr("r", d => d.r);
+
     // Suponiendo que 'node' es la selección de tus nodos circulares
     node.selectAll("circle")
         .on("mouseover", function(event, d) {
@@ -923,11 +935,13 @@ function createStats(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, 
             d3.select("#tooltip").style("visibility", "hidden")
         });
     
-    node.selectAll("circle")
+     node.selectAll("circle")
         .on("click", function(event, d) {
             if (d.depth === 1) { // Verifica si es un círculo de equipo
-                createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, dataHierarchy, selected, data_filtrada,1,d.data.name); // Llama a crearStats con los datos del equipo
-            
+                createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_stats, dataHierarchy, selected, data_filtrada, 1, d.data.name); // Llama a crearStats con los datos del equipo
+                // Añade la clase 'selected-circle' al círculo clickeado
+                SVG2.selectAll("circle").classed("selected-circle", false);
+                d3.select(this).classed("selected-circle", true);
             }
         });
 
@@ -958,7 +972,19 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
             .attr("width", WIDTH_VIS_2/2 - MARGIN_3.left*3)
             .attr("height", HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)
             .style("stroke", "purple");
-        
+
+
+        let cuadradoCentroX = WIDTH_VIS_2/2 + MARGIN_3.left + (WIDTH_VIS_2/2 - MARGIN_3.left*3) / 2;
+        let cuadradoCentroY = MARGIN_3.top*2 + (HEIGHT_VIS_2 - MARGIN_3.bottom*2 - MARGIN_3.top*2) / 2;
+
+        // Añadir un circulo rojo 
+        SVG2.append('circle')
+            .attr("cx", cuadradoCentroX - (WIDTH_VIS_2/2 - MARGIN_3.left*3)/4)
+            .attr("cy", cuadradoCentroY - (HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)/4)
+            .attr("r", 90)
+            .attr("fill", "red")
+            .raise();
+
         return;
     }
 
@@ -967,7 +993,7 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
 
 
     // get el objeto de data_pl_2023_stats que tenga el mismo club que selected_team
-    let teamData = data_pl_2023_stats.filter(d => d.squad.trimStart().split(' ')[0] ===selected_team.trimStart().split(' ')[0])[0];
+    let teamData = data_pl_2023_stats.filter(d => d.squad.trimStart() === selected_team.trimStart())[0];
 
     // console.log(data_pl_2023_stats_selected, selected_team ,'data_pl_2023_stats_selected');
 
@@ -977,11 +1003,11 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
     console.log(teamData, 'data_pl_2023_stats_selected');
 
     // Calcula los totales y porcentajes
-    let totalGames = teamData.w + teamData.d + teamData.l;
+    let totalGames = parseInt(teamData.w) + parseInt(teamData.d) + parseInt(teamData.l);
     let pieData = [
-        {name: 'Win', value: teamData.w / totalGames},
-        {name: 'Draw', value: teamData.d / totalGames},
-        {name: 'Lose', value: teamData.l / totalGames}
+        {name: 'Win', value: parseInt(teamData.w) / totalGames},
+        {name: 'Draw', value: parseInt(teamData.d) / totalGames},
+        {name: 'Lose', value: parseInt(teamData.l) / totalGames}
     ];
 
     // Configura el gráfico de torta
@@ -996,7 +1022,7 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
     // Enter para nuevos elementos
     let gEnter = g.enter().append("g")
         .attr("class", "pieChartGroup")
-        .attr("transform", "translate(" + cuadradoCentroX + "," + cuadradoCentroY + ")");
+        .attr("transform", `translate( ${cuadradoCentroX - (WIDTH_VIS_2/2 - MARGIN_3.left*3)/4}  ${cuadradoCentroY - (HEIGHT_VIS_2-MARGIN_3.bottom*2 - MARGIN_3.top*2)/4} )`);
 
     // Merge para elementos existentes
     g = gEnter.merge(g);
@@ -1011,7 +1037,7 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
         .style("fill", d => {
             switch(d.data.name) {
                 case 'Win': return "green";
-                case 'Draw': return "yellow";
+                case 'Draw': return "#ffc61a";
                 case 'Lose': return "red";
             }
         })
@@ -1027,6 +1053,55 @@ function createStatsRight(data, data_fifa, data_pl_2023_players, data_pl_2023_st
 
     // Remove para arcos que ya no son necesarios
     arcs.exit().remove();
+
+    // Actualizar las etiquetas
+    let labelRadius = radius + 20; // Ajusta según tus necesidades
+
+    // Selecciona o crea etiquetas de texto
+    let text = g.selectAll("text")
+        .data(pie(pieData), d => d.data.name);
+
+    // Enter para nuevas etiquetas
+    text.enter().append("text")
+        .attr("dy", "0.35em")
+        .style("text-anchor", "middle")
+        .style("fill", "white") // Establece el color de las etiquetas a blanco
+        .each(function(d) { this._current = d; }); // guarda el estado inicial para la transición
+
+    // Update para etiquetas existentes
+    text.transition().duration(1000)
+        .attrTween("transform", function(d) {
+            let interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return function(t) {
+                let d2 = interpolate(t);
+                let pos = arc.centroid(d2);
+                pos[0] = pos[0] * 2; // Multiplica por 2 para la etiqueta
+                pos[1] = pos[1] * 2; // Multiplica por 2 para la etiqueta
+                return "translate(" + pos + ")";
+            };
+        })
+        .text(function(d) {
+            let percentage = d.data.name === 'Win' ? parseInt(teamData.w)/totalGames : d.data.name === 'Draw' ? parseInt(teamData.d)/totalGames : parseInt(teamData.l)/totalGames;
+            percentage = Math.round(percentage * 100) + "%";
+            let absoluteValue = d.data.name === 'Win' ? teamData.w : d.data.name === 'Draw' ? teamData.d : teamData.l;
+            return d.data.name + ": " + absoluteValue + " (" + percentage + ")";
+        });
+
+    g.raise();
+
+    // Añadimos un titulo sobre el cuadrado derecho
+
+    SVG2.append("text")
+        .attr("x", WIDTH_VIS_2/2 + MARGIN_3.left)
+        .attr("y", MARGIN_3.top + MARGIN_2.top * 0.5)
+        .attr("text-anchor", "left")
+        .attr("font-size", "10px")
+        .attr("fill", "white")
+        .html('Estadísticas de la Temporada 2022/2023' + '<br> - <br>' +  selected_team );
+
+    // Remove para etiquetas que ya no son necesarias
+    text.exit().remove();
 
         
 
