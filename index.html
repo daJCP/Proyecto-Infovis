@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <title>Proyecto</title>
 </head>
@@ -13,14 +12,13 @@
 <body>
     <div class="container">
         <h1>Informe Proyecto</h1>
-        <p><i>Template</i> base confeccionar el informe. Se puede
-            modificar el estilo si así lo desean, pero se recomienda
-            mantener las secciones separadas para facilitar la corrección del informe.</p>
 
         <div class="response">
             <h3>Integrantes</h2>
-                <p>Nombre 1</p>
-                <p>Nombre 2</p>
+                <lu>
+                    <li>Joaquín Cabello</li>
+                    <li>Diego Rodríguez</li>
+                </lu>
         </div>
 
         <div class="case">
@@ -29,25 +27,47 @@
                 <h4>Contexto de la situación y la naturaleza de los datos</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <!-- parrafo con alineacion justificada -->
+                
+                <p align="justify">El presente proyecto de visualización de información se centra en la <b>Premier League</b>, la cual es la máxima categoría de la liga de fútbol profesional en Inglaterra y la "liga más relevante del mundo"
+                    según la Federación Internacional de Historia y Estadística del Fútbol (IFFHS). En particular, la visualización se centra en la <b>temporada 2022-2023 de la Premier League</b>. El objetivo principal de nuestra visualización es proporcionar
+                     a los usuarios una herramienta eficiente para analizar y comparar el rendimiento de los equipos a lo largo de la temporada. Los datos utilizados incluyen estadísticas de los clubes tales como partidos disputados, partidos ganados/empatados/perdidos, 
+                     goles a favor/en contra, entre otros. Además, se incluyen datos jugadores tales como club, edad, nacionalidad, posición, partidos disputados, imágenes de los rostros, y más. Finalmente se incluyen datos sobre la progresión de la tabla de posiciones partido 
+                     a partido durante la temporada 2022-2023. Todos estos datos han sido obtenidos mediante scraping de diversos sitios web y luego integrados en su formato final.</p>
             </div>
             <div class="response">
                 <h4>Fuente original de los datos</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <br>
+                <lu>
+                    <li><a href="https://fbref.com/en/comps/9/2022-2023/stats/2022-2023-Premier-League-Stats">Football Stats and History | Premier League 2022-2023 </a>
+                        <p>En este sitio se pueden obtener datos sobre el rendimiento de cada equipo de la Premier League 2022-2023 así como también datos de sus jugadores.</p></li>
+                    <li><a href="https://es.wikipedia.org/wiki/Premier_League_2022-23">Wikipedia: Premier League 2022-2023</a>
+                    <p> En wikipedia se puede obtener la progresión de la tabla de posiciones de la liga partido a partido, y también el número total de partidos ganados/empatados/perdidos por cada equipo.</p></li>
+                    <li><a href="https://www.kaggle.com/datasets/bryanb/fifa-player-stats-database">FIFA 23 OFFICIAL DATASET</a>
+                    <p> El dataset FIFA 23 OFFICIAL DATASET de Kaggle cuenta con estadísticas sumamente detalladas de los jugadores presentes en el videojuego FIFA 23; para este proyecto resulta de particular
+                        interés las imágenes de cada jugador que provee este dataset, en particular de los jugadores de la Premier League 2022-2023.
+                    </p></li>
+                </lu>
             </div>
             <div class="response">
                 <h4>Usuario objetivo</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <p align="justify">Nuestro usuario objetivo es aquel apasionado por el fútbol y la Premier League, ya sea un seguidor ferviente, un analista deportivo o alguien que simplemente busca disfrutar de una representación 
+                    visualmente atractiva de los eventos que conforman la temporada 2022-2023 de la liga inglesa. Esta visualización busca ofrecer una experiencia inmersiva que favorezca el disfrute y 
+                    el conocimiento de la emocionante realidad deportiva que define a la Premier League, y está diseñada para satisfacer las necesidades e 
+                    intereses de diversos públicos apasionados por el fútbol y la emoción competitiva de la liga inglesa. </p>
             </div>
             <div class="response">
                 <h4>Uso de la herramienta</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
-                <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <h4>Respuesta: </h4>
+                <p align="justify">Los usuarios pueden utilizar esta herramienta como un medio efectivo para analizar y comprender la dinámica de la liga de fútbol más destacada del mundo. Estos tienen la oportunidad de sumergirse 
+                    en una variedad de estadísticas detalladas que abarcan desde el desempeño de equipos y jugadores hasta la evolución de la tabla de posiciones a lo largo de la temporada. Al proporcionar estadísticas de equipos y jugadores, 
+                    así como la evolución de la liga partido a partido, buscamos que los usuarios puedan analizar y comprender el rendimiento de sus equipos preferidos y seguir de cerca la narrativa de la temporada. En ese sentido, esta herramienta
+                    no solo tiene un uso analítico, sino que tiene también un sentido narrativo.</p>
             </div>
 
         </div>
@@ -58,13 +78,37 @@
                 <h4>Tipos de datos a utilizar en el proyecto</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <p>Los datos utilizados en el proyecto corresponden en su totalidad a datos tabulares. A continuación se entrega información detallada de cada dataset:
+                    <lu>
+                        <li>premier_2022_2023.csv: En este dataset cada ítem corresponde a un equipo de la Premier League. Cuenta con distintos atributos como nombre, ranking, partidos jugados, partidos ganados/perdidos/empatados,
+                            goleador del equipo en la temporada. </li><br>
+                        <li>premier_2022_2023_players.csv: En este dataset cada ítem corresponde a un jugador. Cuenta con distintos atributos como nombre, nacionalidad, posición en la que juega, equipo en el que juega. </li><br>
+                        <li>proyecto_data_ev_table_premier_league_2022_2023.csv: En este dataset cada ítem corresponde a un equipo, y cada atributo corresponde a su posición en la tabla según fecha de la liga.</li><br>
+                        <li>proyecto_data_ev_table_premier_league_2022_2023.json: Mismo dataset anterior en formato json.</li><br>
+                        <li>proyecto_data_fifa_23.csv: Cada ítem corresponde a un jugador, cuenta con diversos atributos como identificador único y estadísticas de desempeño, además de incluir imágenes del rostro del jugador
+                            y del escudo del equipo al que pertenece.
+                        </li>
+                    </lu>
+                </p>
             </div>
             <div class="response">
                 <h4>Tipos de atributos presente en los datos</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <br>
+                <li>premier_2022_2023.csv: Este dataset cuenta con datos categóricos y cuantitativos. En los datos categóricos encontramos el nombre del equipo, nombre del goleador y nombre del portero;
+                    por otro lado, en los datos cuantitativos encontramos todo el resto de los atributos del dataset, que corresponden a estadísticas como partidos ganados, empatados y perdidos, puntos al finalizar la temporada,
+                expectativas de desempeño, entre otros.</li><br>
+                <li>premier_2022_2023_players.csv: Este dataset cuenta con datos categóricos y cuantitativos. En los datos categóricos encontramos el nombre de cada jugador, su nacionalidad y posición en la que juega, además del 
+                    equipo al que pertenece. Todo el resto de los atributos correspoden a datos cuantitativos, como la edad, goles, en general estadísticas de su desempeño.</li><br>
+                <li>proyecto_data_ev_table_premier_league_2022_2023.csv: Este dataset cuenta con solo un dato categórico, que es el nombre de cada equipo, y el resto de los atributos corresponden a datos cuantitativos, 
+                    que corresponden a su posición en la tabla en cada fecha de la liga.
+                </li><br>
+                <li>proyecto_data_ev_table_premier_league_2022_2023.json: Misma descripción que el dataset anterior.</li><br>
+                <li>proyecto_data_fifa_23.csv: Este dataset cuenta tanto con datos categóricos como con datos cuantitativos. Entre los datos categóricos encontramos el nombre, edad, nacionalidad, club, pie hábil. En los datos 
+                    cuantitativos encontramos edad, peso, altura. Además, este dataset cuenta con imágenes de los rostros de los jugadores y de los escudos de los equipos a los que pertenecen, que corresponden
+                    a datos de tipo texto (pues corresponden a links).
+                </li>
             </div>
         </div>
 
@@ -72,45 +116,37 @@
             <h2>Abstracción de tareas</h2>
             <div class="response">
                 <h4>Tarea 1 (acción + objetivo) + justificación según el dominio presentado</h4>
-                <p class="hint">
-                    No olvides que las acciones son: presentar, descubrir, anotar, producir, grabar, localizar, ubicar,
-                    navegar, explorar, identificar, comparar o resumir. Luego, los objetivos son posibles aspectos de
-                    los datos a observar. Como: distribución, proporción, valor, correlación, tendencia, outlier,
-                    feature, caminos, topología, extremos, entre otros.
-                </p>
 
                 <!-- Puedes agregar los P que sean necesarios -->
-                <h4>Acción: [una palabra]</h4>
-                <h4>Objetivo: [una palabra]</h4>
-                <p>Justificar la acción-objetivo con el dominio presentado: </p>
+                <h4>Acción: Observar</h4>
+                <h4>Objetivo: la evolución de la tabla de posiciones según la fecha de la liga.</h4>
+                <p align="justify"> La Premier League es una competición dinámica que se desarrolla con variaciones a lo largo del tiempo. Observar la evolución de la tabla de posiciones
+                    permite a los usuarios evaluar el rendimiento de los equipos a lo largo de la temporada. Pueden identificar momentos clave, como mejoras sustanciales o declives en
+                el rendimiento de los equipos. Además, los usuarios pueden seguir la historia en constante evolución de la liga y comprender cómo los 
+                equipos se posicionan en relación con sus rivales. Por último, la posición en la última fecha de la liga les permite saber  </p>
             </div>
             <div class="response">
-                <h4>Tarea 2 (acción + objetivo) + justificación según el dominio presentado</h4>
-                <p class="hint">
-                    No olvides que las acciones son: presentar, descubrir, anotar, producir, grabar, localizar, ubicar,
-                    navegar, explorar, identificar, comparar o resumir. Luego, los objetivos son posibles aspectos de
-                    los datos a observar. Como: distribución, proporción, valor, correlación, tendencia, outlier,
-                    feature, caminos, topología, extremos, entre otros.
-                </p>
+                <h4>Tarea 2 (acción + objetivo) + justificación según el dominio presentado</h4>              
 
                 <!-- Puedes agregar los P que sean necesarios -->
-                <h4>Acción: [una palabra]</h4>
-                <h4>Objetivo: [una palabra]</h4>
-                <p>Justificar la acción-objetivo con el dominio presentado: </p>
+                <h4>Acción: Presentar</h4>
+                <h4>Objetivo: estadísticas e información relevante de los equipos durante la Premier League 2022-2023.</h4>
+                <p align="justify">La presentación de estadísticas proporciona a los usuarios un acceso rápido a información clave sobre el rendimiento de los equipos. 
+                    Esto es crucial para aquellos que buscan datos específicos, como goles marcados, goles en contra, partidos ganados/perdidos/empatados, o goleador del equipo en la temporada.
+                Además de aportar al análisis, también aporta a formar un sentido de narrativa dentro de la visualización; la Premier League es una competencia emocionante, y la presentación de estadísticas
+            de una forma clara y llamativa aporta contexto a esta emoción. Por último, la información presentada respalda la toma de decisiones informada, ya sea para fanáticos que desean evaluar el rendimiento 
+            de su equipo favorito o para analistas deportivos que buscan insights para análisis más profundos. </p>
             </div>
             <div class="response">
                 <h4>Tarea 3 (acción + objetivo) + justificación según el dominio presentado</h4>
-                <p class="hint">
-                    No olvides que las acciones son: presentar, descubrir, anotar, producir, grabar, localizar, ubicar,
-                    navegar, explorar, identificar, comparar o resumir. Luego, los objetivos son posibles aspectos de
-                    los datos a observar. Como: distribución, proporción, valor, correlación, tendencia, outlier,
-                    feature, caminos, topología, extremos, entre otros.
-                </p>
-
+         
                 <!-- Puedes agregar los P que sean necesarios -->
-                <h4>Acción: [una palabra]</h4>
-                <h4>Objetivo: [una palabra]</h4>
-                <p>Justificar la acción-objetivo con el dominio presentado: </p>
+                <h4>Acción: Comparar</h4>
+                <h4>Objetivo: las nacionalidades de los jugadores de los distintos equipos.</h4>
+                <p align="justify"> Comparar las nacionalidades de los jugadores resalta la diversidad internacional dentro de los equipos de la Premier League. Permite a los usuarios identificar rápidamente 
+                    qué equipos tienen una composición más diversa en términos de nacionalidades, facilita la identificación de patrones y tendencias en las nacionalidades de los jugadores. 
+                    Los usuarios pueden observar visualmente si hay concentraciones de jugadores de una región específica o si la distribución es más equitativa, proporcionando percepciones 
+                    valiosas sobre la diversidad geográfica en la liga.</p>
             </div>
         </div>
 
@@ -120,19 +156,68 @@
                 <h4>Decisiones de diseño relacionadas a la primera tarea visual</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <p align="justify">Para la tarea de "Observar la evolución de la tabla de posiciones según fecha de la liga", las decisión de la codificación visual y de diseño tuvo el foco en permitir al usuario
+                    navegar fácilmente a través de las distintas fechas de la liga, y poder observar la evolución de la tabla de posiciones de forma clara y concisa. Para esto, se decidió utilizar un
+                    gráfico multilínea, donde cada línea representa la evolución de un equipo en la tabla de posiciones.<br><br>
+
+                    En dicho gráfico, el eje X codifica la fecha de la liga, y el eje Y codifica la posición en la tabla de posiciones. Este gráfico cuenta con interacciones, en particular zoom y panning,
+                    que permiten al usuario navegar a través de las distintas fechas de la liga y observar la información a distinto nivel de detalle. Además, al costado derecho de la visualización, se observan 
+                    los escudos de los equipos, lo que permite una rápida distinción para el usuario de qué línea representa a qué equipo. Estos escudos además tienen un color de fondo según la posición en la que 
+                    se encuentran. Los equipos de las primeras 4 posiciones se muestran con fondo verde agua, pues son aquellos que aseguran cupo para la Champions League. Los equipos de la posición 5 y 6 se muestran con color
+                    amarillo, y corresponden a aquellos que irán a la Europa League. El equipo de la posición 7 se muestra con color verde oscuro, pues es el equipo que irá a la Conference League. Aquellos equipos
+                    que se muestran con fondo grisaceo no clasifican a ningún torneo internacional. Finalmente, los equipos en rojo (últimas 3 posiciones) son aquellos que descienden a la Championship. Los colores de las líneas
+                    que representan a cada equipo son arbitrarios.<br><br>
+
+                    Como la información a presentar en este gráfico es abundante (por el número de equipos), se decide incluir un selector abajo del gráfico. Este selector es visualmente atractivo e intuitivo, pues
+                    está conformado por los escudos de los equipos, y permite al usuario seleccionar qué equipos desea visualizar en el gráfico mediante un simple click. Además, se incluye un botón que permite al usuario 
+                    seleccionar todos los equipos (representado por el escudo de la Premier League). Este selector también afecta a las visualizaciones que se describen para la segunda y tercera tarea visual.
+                </p>
             </div>
             <div class="response">
                 <h4>Decisiones de diseño relacionadas a la segunda tarea visual</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <p align="justify">Para la tarea de "Presentar estadísticas e información relevante de los equipos de la Premier League 2022-2023", el diseño de la codificación visual se centró en entregar estadísticas de forma concisa y clara, sin
+                    entrar en excesos de información ni ruido visual que pudieran interferir con la interpretación de estas. <br><br>
+
+                    Para la presentación de partidos ganados/perdidos/empatados, se decidió utilizar un gráfico de torta que presenta la proporción de partidos ganados/perdidos/empatados de cada equipo. Este gráfico cuenta con
+                    colores que permiten una rápida distinción de cada categoría, y además se incluye texto para especificar los números de partidos de cada categoría y su proporción porcentual. <br><br>
+
+                    Para el resto de las estadísticas, la información se despliega simplemente a través de paneles o cajas, con un título descriptivo de la información que se presenta (puntos obtenidos, posición, 
+                    goles a favor, goles en contra, diferencia de goles) y el valor numérico de dicha estadística. Además, dependiendo del valor para estas, se incluye un color de fondo que entrega aún más contexto al usuario
+                    facilitando la comprensión de la información. Por ejemplo, si un equipo tiene una diferencia de goles positiva, el color de fondo será verde; si es negativa, el color de fondo será rojo.<br><br>
+
+                    También se presenta al goleador del equipo en la temporada 2022-2023 y el total de goles anotado por este jugador, además de una imagen del rostro del jugador.
+                    <br><br>
+                    Como mencionamos anteriormente, esta visualización se ve afectada por el selector conformado por los escudos de los distintos equipos. Sin embargo, cuando hay dos o más equipos seleccionados, esta visualización
+                    deja de mostrar información, pues está pensada para la presentación de estadísticas de cada equipo por separado. Esta visualización también se ve afectada por el selector incluido en el gráfico para la tercera tarea visual,
+                    que se describe a continuación.
+
+                </p>
             </div>
             <div class="response">
                 <h4>Decisiones de diseño relacionadas a la tercera tarea visual</h4>
                 <!-- Puedes agregar los P que sean necesarios -->
                 <h4>Respuesta:</h4>
-                <p>Modifica solo este texto (no el de arriba) para poner tu respuesta</p>
+                <p align="justify">Para la tarea de "Comparar las nacionalidades de los jugadores de los distintos equipos", se tomó la decisión de utilizar Circular Packing como codificación visual, dado que esta permite
+                    presentar claramente la agrupación de las distintas nacionalidades de los jugadores de un equipo, y el foco de la codificación estuvo en que el usuario pudiera distinguir eficientemente entre los distintos
+                     equipos.<br><br>
+
+                     Cada círculo de esta visualización representa a un equipo, y en su interior se incluyen círculos más pequeños que representan a las distintas nacionalidades de los jugadores de ese equipo. Las nacionalidades
+                     se distinguen incluyendo la bandera de cada país, y el tamaño de cada círculo representa la cantidad de jugadores de esa nacionalidad en el equipo. <br><br>
+
+                     Como el usuario podría estar interesado por las nacionalidades de cierto(s) equipo(s), esta visualización se ve afectada por el selector conformado por los escudos de los distintos equipos. Cuando están todos 
+                     los equipos seleccionados, se muestra la información para todos los equipos. Según se van seleccionando individualmente los equipos, se muestra la información para cada equipo por separado; y según se vayan 
+                     seleccionando dos o más equipos, se va a agregando información a esta visualización. <br><br>
+
+                     Se tomó la decisión de que esta visualización funcione también como selector, en particular para desplegar la visualización de las estadísticas. El usuario podrá hacer click en el círculo correspondiente 
+                     a un equipo y así desplegar la información de dicho equipo en la visualización de estadísticas.<br><br>
+
+                     Para la identificación de los equipos dentro del Circular Packing se agregó un tooltip que muestra el nombre del equipo al pasar el mouse por encima del círculo correspondiente. Lo mismo con las nacionalidades,
+                        que al pasar el mouse por encima del círculo correspondiente se muestra el nombre del país, el número de jugadores de dicho país y los nombres de los jugadores de dicho país.
+                    
+
+                    </p>
             </div>
         </div>
 
